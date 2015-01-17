@@ -13,3 +13,8 @@ class HBaseSparkContext(@transient sc: SparkContext) extends Serializable {
   def hbaseTable[R: ClassTag](table: String)(implicit mapper: FieldMapper[R]): HBaseReaderBuilder[R] = new HBaseReaderBuilder[R](sc, table=table)
 
 }
+
+trait HBaseSparkContextConversions extends Serializable {
+  // Include new methods into the SparkContext object
+  implicit def toHBaseSparkContext(sc: SparkContext): HBaseSparkContext = new HBaseSparkContext(sc)
+}

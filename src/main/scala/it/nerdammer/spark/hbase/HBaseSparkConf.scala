@@ -11,13 +11,12 @@ case class HBaseSparkConf private[hbase] (
   hbaseHost: String = HBaseSparkConf.DefaultHBaseHost,
   hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) {
 
-  def createHadoopReadConfig(table: String) = {
+  def createHadoopBaseConfig() = {
     val conf = HBaseConfiguration.create
     conf.setBoolean("hbase.cluster.distributed", true)
     conf.setInt("hbase.client.scanner.caching", 10000)
     conf.set("hbase.rootdir", hbaseRootDir)
     conf.set("hbase.zookeeper.quorum", hbaseHost)
-    conf.set(TableInputFormat.INPUT_TABLE, table)
 
     conf
   }

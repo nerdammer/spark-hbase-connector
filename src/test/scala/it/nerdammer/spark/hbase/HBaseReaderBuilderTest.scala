@@ -16,15 +16,13 @@ class HBaseReaderBuilderTest extends FlatSpec with Matchers {
     conf.setAppName("test")
     val sc = new SparkContext(conf)
 
-    val xx = sc.hbaseTable[String]("connector")
+    val ciccioCount = sc.hbaseTable[(String, String)]("connector")
+      .select("c1", "c2")
+      .withColumnFamily("test1")
+      .filter(_._1=="ciccio")
+      .count
 
-    sc.hbaseTable[(String, String)]("connector").withColumnFamily("test1").withColumns("c1", "c2")
-      .foreach({
-      case a => {
-        println(a)
-      }
-    })
-
+    println("Cicci: " + ciccioCount)
 
   }
 

@@ -13,13 +13,13 @@ trait FieldMapper[T] extends Serializable {
 trait SingleColumnFieldMapper[T] extends FieldMapper[T] {
 
   def map(data: HBaseDataHolder): T =
-    if(data.result.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.result.size}")
-    else columnMap(data.result.head)
+    if(data.columns.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.columns.size}")
+    else columnMap(data.columns.head)
 
   def columnMap(cols: Array[Byte]): T
 }
 
-trait FieldMapperImplicits extends Serializable {
+trait FieldMapperConversions extends Serializable {
 
   implicit def intMapper: FieldMapper[Int] = new SingleColumnFieldMapper[Int] {
     def columnMap(cols: Array[Byte]): Int = Bytes.toInt(cols)
@@ -32,7 +32,7 @@ trait FieldMapperImplicits extends Serializable {
 
   // TEMP
   implicit def testMapper: FieldMapper[(String, String)] = new FieldMapper[(String, String)] {
-    def map(data: HBaseDataHolder) = (Bytes.toString(data.result.head), Bytes.toString(data.result.tail.head))
+    def map(data: HBaseDataHolder) = (Bytes.toString(data.columns.head), Bytes.toString(data.columns.tail.head))
   }
 
 

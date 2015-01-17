@@ -3,6 +3,7 @@ package it.nerdammer.spark.hbase
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.{NewHadoopRDD, RDD}
 import org.apache.spark.{TaskContext, Partition}
 
@@ -25,7 +26,6 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
   }
 
   def conversion(key: ImmutableBytesWritable, row: Result) =
-    mapper.map(new HBaseDataHolder((row.listCells.map(c => CellUtil.cloneValue(c).array))))
-
+    mapper.map(new HBaseDataHolder(Bytes.toString(key.get), row.listCells.map(c => CellUtil.cloneValue(c).array)))
 
 }
