@@ -22,13 +22,33 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       (implicit mapper: FieldMapper[R]) extends Serializable {
 
 
-    def select(columns: String*): HBaseReaderBuilder[R] = {require(columns.nonEmpty); this.copy(columns = columns)}
+    def select(columns: String*): HBaseReaderBuilder[R] = {
+      require(this.columns.isEmpty, "Columns have already been set")
+      require(columns.nonEmpty, "You should provide at least one column")
 
-    def withColumnFamily(columnFamily: String) = this.copy(columnFamily = Some(columnFamily))
+      this.copy(columns = columns)
+    }
 
-    def withStartRow(startRow: String) = this.copy(startRow = Some(startRow))
+    def inColumnFamily(columnFamily: String) = {
+      require(this.columnFamily.isEmpty, "Default column family has already been set")
+      require(columnFamily.nonEmpty, "Invalid column family provided")
 
-    def withStopRow(stopRow: String) = this.copy(startRow = Some(stopRow))
+      this.copy(columnFamily = Some(columnFamily))
+    }
+
+    def withStartRow(startRow: String) = {
+      require(startRow.nonEmpty, s"Invalid start row '${startRow}'")
+      require(this.startRow.isEmpty, "Start row has already been set")
+
+      this.copy(startRow = Some(startRow))
+    }
+
+    def withStopRow(stopRow: String) = {
+      require(stopRow.nonEmpty, s"Invalid stop row '${stopRow}'")
+      require(this.stopRow.isEmpty, "Stop row has already been set")
+
+      this.copy(stopRow = Some(stopRow))
+    }
 
 }
 

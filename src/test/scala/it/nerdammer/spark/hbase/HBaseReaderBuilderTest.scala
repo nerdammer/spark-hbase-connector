@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
  */
 class HBaseReaderBuilderTest extends FlatSpec with Matchers {
 
-  "a spark context" should "have a method named hbaseTable" in {
+  "a HBaseRDD" should "allow filtering and counting" in {
 
     val conf = new SparkConf()
     conf.set("spark.master", "local")
@@ -18,7 +18,7 @@ class HBaseReaderBuilderTest extends FlatSpec with Matchers {
 
     val ciccioCount = sc.hbaseTable[(String, String)]("connector")
       .select("c1", "c2")
-      .withColumnFamily("test1")
+      .inColumnFamily("test1")
       .filter(_._1=="ciccio")
       .count
 
