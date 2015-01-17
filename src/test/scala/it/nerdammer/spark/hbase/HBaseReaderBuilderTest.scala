@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 /**
  * Created by Nicola Ferraro on 10/01/15.
  */
-class HBaseRDDTest extends FlatSpec with Matchers {
+class HBaseReaderBuilderTest extends FlatSpec with Matchers {
 
   "a spark context" should "have a method named hbaseTable" in {
 
@@ -16,7 +16,9 @@ class HBaseRDDTest extends FlatSpec with Matchers {
     conf.setAppName("test")
     val sc = new SparkContext(conf)
 
-    sc.hbaseTable[String]("connector").withColumnFamily("test1").withColumns("c2")
+    val xx = sc.hbaseTable[String]("connector")
+
+    sc.hbaseTable[(String, String)]("connector").withColumnFamily("test1").withColumns("c1", "c2")
       .foreach({
       case a => {
         println(a)

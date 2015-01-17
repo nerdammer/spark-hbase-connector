@@ -10,6 +10,6 @@ import scala.reflect.ClassTag
  */
 class HBaseSparkContext(@transient sc: SparkContext) extends Serializable {
 
-  def hbaseTable[R: ClassTag](table: String)(implicit mapper: FieldMapper[R]): HBaseRDD[R] = new HBaseRDD[R](sc, table=table)
+  def hbaseTable[R: ClassTag](table: String)(implicit mapper: FieldMapper[R]): HBaseReaderBuilder[R] = new HBaseReaderBuilder[R](sc, table=table)
 
 }
