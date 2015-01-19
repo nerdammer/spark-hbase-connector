@@ -3,7 +3,7 @@ package it.nerdammer.spark.hbase
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
-import org.apache.spark.{Logging, SparkContext}
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.{NewHadoopRDD, RDD}
 
 import scala.reflect.ClassTag
@@ -17,10 +17,12 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       columnFamily: Option[String] = None,
       columns: Iterable[String] = Seq.empty,
       startRow: Option[String] = None,
-      stopRow: Option[String] = None
+      stopRow: Option[String] = None,
+      salting: Iterable[String] = Seq.empty
       )
       (implicit mapper: FieldMapper[R]) extends Serializable {
 
+    protected[hbase] def withRanges(startRow: Option[String], stopRow: Option[String], salting: Iterable[String]) = copy(startRow = startRow, stopRow = stopRow, salting = salting)
 
     def select(columns: String*): HBaseReaderBuilder[R] = {
       require(this.columns.isEmpty, "Columns have already been set")
@@ -37,25 +39,46 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
     }
 
     def withStartRow(startRow: String) = {
-      require(startRow.nonEmpty, s"Invalid start row '${startRow}'")
+      require(startRow.nonEmpty, s"Invalid start row '$startRow'")
       require(this.startRow.isEmpty, "Start row has already been set")
 
       this.copy(startRow = Some(startRow))
     }
 
     def withStopRow(stopRow: String) = {
-      require(stopRow.nonEmpty, s"Invalid stop row '${stopRow}'")
+      require(stopRow.nonEmpty, s"Invalid stop row '$stopRow'")
       require(this.stopRow.isEmpty, "Stop row has already been set")
 
       this.copy(stopRow = Some(stopRow))
     }
 
+    def withSalting(salting: Iterable[String]) = {
+      require(salting.size > 1, "Invalid salting. Two or more elements are required")
+      require(this.salting.isEmpty, "Salting has already been set")
+
+      this.copy(salting = salting)
+    }
 }
 
 
 trait HBaseReaderBuilderConversions extends Serializable {
 
-  implicit def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldMapper[R]): HBaseSimpleRDD[R] = {
+  implicit def toHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldMapper[R]): RDD[R] = {
+    if(builder.salting.isEmpty) {
+      toSimpleHBaseRDD(builder)
+    } else {
+      require(builder.startRow.nonEmpty || builder.stopRow.nonEmpty, "Salting can be used only together with startRow and/or stopRow")
+
+      val builders = getSaltedBuilders(builder)
+
+
+      val rddSeq = builders.map(bui => toSimpleHBaseRDD(bui).asInstanceOf[RDD[R]]).toSeq
+      val sc = rddSeq.head.sparkContext
+      new HBaseSaltedRDD[R](sc, rddSeq)
+    }
+  }
+
+  def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldMapper[R]): HBaseSimpleRDD[R] = {
     val hbaseConfig = HBaseSparkConf.fromSparkConf(builder.sc.getConf).createHadoopBaseConfig()
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
@@ -89,5 +112,18 @@ trait HBaseReaderBuilderConversions extends Serializable {
     new HBaseSimpleRDD[R](rdd)
   }
 
+  def getSaltedBuilders[R](builder: HBaseReaderBuilder[R]) = {
+    val sortedSalting = builder.salting.toList.sorted map (str => Some(str))
+
+    val ranges = sortedSalting zip (sortedSalting.drop(1) :+ None)
+
+    ranges.map(salt =>
+        builder.withRanges(
+          if(builder.startRow.nonEmpty) Some(salt._1.get + builder.startRow.get) else salt._1,
+          if(builder.stopRow.nonEmpty) Some(salt._1.get + builder.stopRow.get) else salt._2,
+          Iterable.empty
+        )
+    )
+  }
 
 }

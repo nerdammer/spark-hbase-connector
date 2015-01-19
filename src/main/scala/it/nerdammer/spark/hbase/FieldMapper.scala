@@ -2,8 +2,6 @@ package it.nerdammer.spark.hbase
 
 import org.apache.hadoop.hbase.util.Bytes
 
-import scala.reflect.ClassTag
-
 
 /**
  * Created by Nicola Ferraro on 10/01/15.
@@ -31,7 +29,7 @@ trait TupleFieldMapper[T <: Product] extends FieldMapper[T] {
     else if(data.columns.size==n-1)
       tupleMap(new HBaseDataHolder(data.rowKey, Bytes.toBytes(data.rowKey) :: data.columns.toList))
     else
-      throw new IllegalArgumentException(s"Unexpected number of columns: expected ${n} or ${n-1}, returned ${data.columns.size}")
+      throw new IllegalArgumentException(s"Unexpected number of columns: expected $n or ${n-1}, returned ${data.columns.size}")
 
   def tupleMap(data: HBaseDataHolder): T
 }

@@ -1,6 +1,5 @@
 package it.nerdammer.spark.hbase
 
-import it.nerdammer.spark.hbase.FieldMapper
 import org.apache.spark.SparkContext
 
 import scala.reflect.ClassTag

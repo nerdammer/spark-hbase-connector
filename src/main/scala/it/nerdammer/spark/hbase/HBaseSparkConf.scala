@@ -1,7 +1,6 @@
 package it.nerdammer.spark.hbase
 
 import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.spark.SparkConf
 
 /**
@@ -20,7 +19,6 @@ case class HBaseSparkConf private[hbase] (
 
     conf
   }
-
 }
 
 object HBaseSparkConf {
