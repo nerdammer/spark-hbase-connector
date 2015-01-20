@@ -5,7 +5,7 @@ scala:
 before_install: ./scripts/ci/before-install.sh
 install:        ./scripts/ci/install.sh
 before_script:  ./scripts/ci/before-script.sh
-after_script:   ./scripts/ci/after-install.sh
+after_script:   ./scripts/ci/after-script.sh
 
 script:
    - sbt ++$TRAVIS_SCALA_VERSION test
