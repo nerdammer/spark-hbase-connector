@@ -2,5 +2,10 @@ language: scala
 scala:
    - 2.10.4
 
+before_install: ./scripts/ci/before-install.sh
+install:        ./scripts/ci/install.sh
+before_script:  ./scripts/ci/before-script.sh
+after_script:   ./scripts/ci/after-install.sh
+
 script:
    - sbt ++$TRAVIS_SCALA_VERSION test
