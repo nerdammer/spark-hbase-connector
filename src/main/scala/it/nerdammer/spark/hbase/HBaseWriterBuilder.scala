@@ -19,7 +19,7 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       table: String,
       columnFamily: Option[String] = None,
       columns: Iterable[String] = Seq.empty
-      )
+      )(implicit m: FieldWriter[R])
       extends Serializable {
 
 
@@ -39,7 +39,7 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
 
 }
 
-class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R]) extends Serializable {
+class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit m: FieldWriter[R]) extends Serializable {
 
   def toHBaseTable(table: String) = new HBaseWriterBuilder[R](rdd, table)
 
@@ -89,7 +89,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit writer: 
 
 trait HBaseWriterBuilderConversions extends Serializable {
 
-  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](rdd)
+  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R])(implicit m: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](rdd)
 
   implicit def writerBuilderToWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit m: FieldWriter[R]): HBaseWriter[R] = new HBaseWriter[R](builder)
 
