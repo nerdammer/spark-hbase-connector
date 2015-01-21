@@ -6,11 +6,11 @@ import org.apache.hadoop.hbase.util.Bytes
 /**
  * Created by Nicola Ferraro on 10/01/15.
  */
-trait FieldMapper[T] extends Serializable {
+trait FieldReader[T] extends Serializable {
   def map(data: HBaseDataHolder): T
 }
 
-trait SingleColumnFieldMapper[T] extends FieldMapper[T] {
+trait SingleColumnFieldReader[T] extends FieldReader[T] {
 
   def map(data: HBaseDataHolder): T =
     if(data.columns.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.columns.size}")
@@ -19,7 +19,7 @@ trait SingleColumnFieldMapper[T] extends FieldMapper[T] {
   def columnMap(cols: Array[Byte]): T
 }
 
-trait TupleFieldMapper[T <: Product] extends FieldMapper[T] {
+trait TupleFieldReader[T <: Product] extends FieldReader[T] {
 
   val n: Int
 
@@ -34,45 +34,45 @@ trait TupleFieldMapper[T <: Product] extends FieldMapper[T] {
   def tupleMap(data: HBaseDataHolder): T
 }
 
-trait FieldMapperConversions extends Serializable {
+trait FieldReaderConversions extends Serializable {
 
   // Simple types
 
-  implicit def intMapper: FieldMapper[Int] = new SingleColumnFieldMapper[Int] {
+  implicit def intReader: FieldReader[Int] = new SingleColumnFieldReader[Int] {
     def columnMap(cols: Array[Byte]): Int = Bytes.toInt(cols)
   }
 
-  implicit def longMapper: FieldMapper[Long] = new SingleColumnFieldMapper[Long] {
+  implicit def longReader: FieldReader[Long] = new SingleColumnFieldReader[Long] {
     def columnMap(cols: Array[Byte]): Long = Bytes.toLong(cols)
   }
 
-  implicit def shortMapper: FieldMapper[Short] = new SingleColumnFieldMapper[Short] {
+  implicit def shortReader: FieldReader[Short] = new SingleColumnFieldReader[Short] {
     def columnMap(cols: Array[Byte]): Short = Bytes.toShort(cols)
   }
 
-  implicit def doubleMapper: FieldMapper[Double] = new SingleColumnFieldMapper[Double] {
+  implicit def doubleReader: FieldReader[Double] = new SingleColumnFieldReader[Double] {
     def columnMap(cols: Array[Byte]): Double = Bytes.toDouble(cols)
   }
 
-  implicit def floatMapper: FieldMapper[Float] = new SingleColumnFieldMapper[Float] {
+  implicit def floatReader: FieldReader[Float] = new SingleColumnFieldReader[Float] {
     def columnMap(cols: Array[Byte]): Float = Bytes.toFloat(cols)
   }
 
-  implicit def booleanMapper: FieldMapper[Boolean] = new SingleColumnFieldMapper[Boolean] {
+  implicit def booleanReader: FieldReader[Boolean] = new SingleColumnFieldReader[Boolean] {
     def columnMap(cols: Array[Byte]): Boolean = Bytes.toBoolean(cols)
   }
 
-  implicit def bigDecimalMapper: FieldMapper[BigDecimal] = new SingleColumnFieldMapper[BigDecimal] {
+  implicit def bigDecimalReader: FieldReader[BigDecimal] = new SingleColumnFieldReader[BigDecimal] {
     def columnMap(cols: Array[Byte]): BigDecimal = Bytes.toBigDecimal(cols)
   }
 
-  implicit def stringMapper: FieldMapper[String] = new SingleColumnFieldMapper[String] {
+  implicit def stringReader: FieldReader[String] = new SingleColumnFieldReader[String] {
     def columnMap(cols: Array[Byte]): String = Bytes.toString(cols)
   }
 
   // Tuples
 
-  implicit def tuple2Mapper[T1, T2](implicit m1: FieldMapper[T1], m2: FieldMapper[T2]): FieldMapper[(T1, T2)] = new TupleFieldMapper[(T1, T2)] {
+  implicit def tuple2Reader[T1, T2](implicit m1: FieldReader[T1], m2: FieldReader[T2]): FieldReader[(T1, T2)] = new TupleFieldReader[(T1, T2)] {
 
     val n = 2
 
@@ -83,7 +83,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple3Mapper[T1, T2, T3](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3]): FieldMapper[(T1, T2, T3)] = new TupleFieldMapper[(T1, T2, T3)] {
+  implicit def tuple3Reader[T1, T2, T3](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3]): FieldReader[(T1, T2, T3)] = new TupleFieldReader[(T1, T2, T3)] {
 
     val n = 3
 
@@ -95,7 +95,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple4Mapper[T1, T2, T3, T4](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4]): FieldMapper[(T1, T2, T3, T4)] = new TupleFieldMapper[(T1, T2, T3, T4)] {
+  implicit def tuple4Reader[T1, T2, T3, T4](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4]): FieldReader[(T1, T2, T3, T4)] = new TupleFieldReader[(T1, T2, T3, T4)] {
 
     val n = 4
 
@@ -108,7 +108,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple5Mapper[T1, T2, T3, T4, T5](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5]): FieldMapper[(T1, T2, T3, T4, T5)] = new TupleFieldMapper[(T1, T2, T3, T4, T5)] {
+  implicit def tuple5Reader[T1, T2, T3, T4, T5](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5]): FieldReader[(T1, T2, T3, T4, T5)] = new TupleFieldReader[(T1, T2, T3, T4, T5)] {
 
     val n = 5
 
@@ -122,7 +122,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple6Mapper[T1, T2, T3, T4, T5, T6](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5], m6: FieldMapper[T6]): FieldMapper[(T1, T2, T3, T4, T5, T6)] = new TupleFieldMapper[(T1, T2, T3, T4, T5, T6)] {
+  implicit def tuple6Reader[T1, T2, T3, T4, T5, T6](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6]): FieldReader[(T1, T2, T3, T4, T5, T6)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6)] {
 
     val n = 6
 
@@ -137,7 +137,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple7Mapper[T1, T2, T3, T4, T5, T6, T7](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5], m6: FieldMapper[T6], m7: FieldMapper[T7]): FieldMapper[(T1, T2, T3, T4, T5, T6, T7)] = new TupleFieldMapper[(T1, T2, T3, T4, T5, T6, T7)] {
+  implicit def tuple7Reader[T1, T2, T3, T4, T5, T6, T7](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7]): FieldReader[(T1, T2, T3, T4, T5, T6, T7)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7)] {
 
     val n = 7
 
@@ -153,7 +153,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple8Mapper[T1, T2, T3, T4, T5, T6, T7, T8](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5], m6: FieldMapper[T6], m7: FieldMapper[T7], m8: FieldMapper[T8]): FieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8)] = new TupleFieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8)] {
+  implicit def tuple8Reader[T1, T2, T3, T4, T5, T6, T7, T8](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8)] {
 
     val n = 8
 
@@ -170,7 +170,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple9Mapper[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5], m6: FieldMapper[T6], m7: FieldMapper[T7], m8: FieldMapper[T8], m9: FieldMapper[T9]): FieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] = new TupleFieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] {
+  implicit def tuple9Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] {
 
     val n = 9
 
@@ -188,7 +188,7 @@ trait FieldMapperConversions extends Serializable {
     }
   }
 
-  implicit def tuple10Mapper[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](implicit m1: FieldMapper[T1], m2: FieldMapper[T2], m3: FieldMapper[T3], m4: FieldMapper[T4], m5: FieldMapper[T5], m6: FieldMapper[T6], m7: FieldMapper[T7], m8: FieldMapper[T8], m9: FieldMapper[T9], m10: FieldMapper[T10]): FieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] = new TupleFieldMapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] {
+  implicit def tuple10Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] {
 
     val n = 10
 

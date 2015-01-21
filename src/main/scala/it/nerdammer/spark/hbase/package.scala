@@ -5,5 +5,7 @@ package it.nerdammer.spark
  */
 package object hbase
                   extends HBaseSparkContextConversions
-                  with FieldMapperConversions
+                  with FieldReaderConversions
+                  with FieldWriterConversions
                   with HBaseReaderBuilderConversions
+                  with HBaseWriterBuilderConversions

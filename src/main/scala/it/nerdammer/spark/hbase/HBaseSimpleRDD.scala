@@ -5,17 +5,16 @@ import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.rdd.{NewHadoopRDD, RDD}
-import org.apache.spark.{TaskContext, Partition}
+import org.apache.spark.{Partition, TaskContext}
 
 import scala.collection.JavaConversions._
-
 import scala.reflect.ClassTag
 
 /**
  * Created by Nicola Ferraro on 17/01/15.
  */
 class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result])
-                       (implicit mapper: FieldMapper[R]) extends RDD[R](hadoopHBase) {
+                       (implicit mapper: FieldReader[R]) extends RDD[R](hadoopHBase) {
 
   override def getPartitions: Array[Partition] = firstParent[(ImmutableBytesWritable, Result)].partitions
 

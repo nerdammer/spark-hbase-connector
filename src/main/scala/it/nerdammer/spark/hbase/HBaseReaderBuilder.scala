@@ -20,7 +20,7 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       stopRow: Option[String] = None,
       salting: Iterable[String] = Seq.empty
       )
-      (implicit mapper: FieldMapper[R]) extends Serializable {
+      (implicit mapper: FieldReader[R]) extends Serializable {
 
     protected[hbase] def withRanges(startRow: Option[String], stopRow: Option[String], salting: Iterable[String]) = copy(startRow = startRow, stopRow = stopRow, salting = salting)
 
@@ -63,7 +63,7 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
 
 trait HBaseReaderBuilderConversions extends Serializable {
 
-  implicit def toHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldMapper[R]): RDD[R] = {
+  implicit def toHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldReader[R]): RDD[R] = {
     if(builder.salting.isEmpty) {
       toSimpleHBaseRDD(builder)
     } else {
@@ -78,7 +78,7 @@ trait HBaseReaderBuilderConversions extends Serializable {
     }
   }
 
-  def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldMapper[R]): HBaseSimpleRDD[R] = {
+  def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldReader[R]): HBaseSimpleRDD[R] = {
     val hbaseConfig = HBaseSparkConf.fromSparkConf(builder.sc.getConf).createHadoopBaseConfig()
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
