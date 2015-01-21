@@ -58,6 +58,13 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
 
       this.copy(salting = salting)
     }
+
+    private[hbase] def columnsWithFamily(): Iterable[(String, String)] = {
+      columns.map(c => {
+        if(c.contains(':')) (c.substring(0, c.indexOf(':')), c.substring(c.indexOf(':') + 1))
+        else (columnFamily.get, c)
+      })
+    }
 }
 
 
@@ -109,7 +116,7 @@ trait HBaseReaderBuilderConversions extends Serializable {
       classOf[ImmutableBytesWritable], classOf[Result])
       .asInstanceOf[NewHadoopRDD[ImmutableBytesWritable, Result]]
 
-    new HBaseSimpleRDD[R](rdd)
+    new HBaseSimpleRDD[R](rdd, builder)
   }
 
   def getSaltedBuilders[R](builder: HBaseReaderBuilder[R]) = {

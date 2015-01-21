@@ -14,7 +14,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
   val table: String = UUID.randomUUID().toString
-  val columnFamily: String = "cf"
+  val columnFamily: String = "cfconv"
 
   override def beforeAll() = {
     val conf = HBaseSparkConf()
@@ -41,60 +41,60 @@ class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  
     sparkConf.setAppName("test")
     val sc = new SparkContext(sparkConf)
 
-    val data = sc.parallelize(1 to 100)
+    try {
+
+      sc.parallelize(1 to 100)
+        .map(i => (i.toString, i, i.toShort, i.toLong, i % 2 == 0, i.toDouble, i.toFloat, BigDecimal(i), i.toString))
+        .toHBaseTable(table).toColumns("col-int", "col-sho", "col-lon", "col-boo", "col-dou", "col-flo", "col-big", "col-str")
+        .inColumnFamily(columnFamily)
+        .save()
 
 
-    data
-      .map(i => (i.toString, i))
-      .toHBaseTable(table).toColumns("col-int").inColumnFamily(columnFamily).save()
+      val retrieved = sc.hbaseTable[(String, Int, Short, Long, Boolean, Double, Float, BigDecimal, String)](table)
+        .select("col-int", "col-sho", "col-lon", "col-boo", "col-dou", "col-flo", "col-big", "col-str")
+        .inColumnFamily(columnFamily)
+        .sortBy(_._1.toInt)
+        .collect()
 
-    data
-      .map(i => (i.toString, i.toShort))
-      .toHBaseTable(table).toColumns("col-sho").inColumnFamily(columnFamily).save()
+      val cmp = (1 to 100) zip retrieved
 
-    data
-      .map(i => (i.toString, i.toLong))
-      .toHBaseTable(table).toColumns("col-lon").inColumnFamily(columnFamily).save()
+      cmp.foreach(p => {
+        p._1 should be(p._2._2)
+        p._1.toShort should be(p._2._3)
+        p._1.toLong should be(p._2._4)
+        (p._1 % 2 == 0) should be(p._2._5)
+        p._1.toDouble should be(p._2._6)
+        p._1.toFloat should be(p._2._7)
+        BigDecimal(p._1) should be(p._2._8)
+        p._1.toString should be(p._2._9)
+      })
 
-    data
-      .map(i => (i.toString, i%2==0))
-      .toHBaseTable(table).toColumns("col-boo").inColumnFamily(columnFamily).save()
-
-    data
-      .map(i => (i.toString, i.toDouble))
-      .toHBaseTable(table).toColumns("col-dou").inColumnFamily(columnFamily).save()
-
-    data
-      .map(i => (i.toString, i.toFloat))
-      .toHBaseTable(table).toColumns("col-flo").inColumnFamily(columnFamily).save()
-
-    data
-      .map(i => (i.toString, BigDecimal.apply(i)))
-      .toHBaseTable(table).toColumns("col-big").inColumnFamily(columnFamily).save()
-
-    data
-      .map(i => (i.toString, i.toString))
-      .toHBaseTable(table).toColumns("col-str").inColumnFamily(columnFamily).save()
-
-
-    val retrieved = sc.hbaseTable[(String, Int, Short, Long, Boolean, Double, Float, BigDecimal, String)](table)
-      .select("col-int", "col-sho", "col-lon", "col-boo", "col-dou", "col-flo", "col-big", "col-str")
-      .inColumnFamily(columnFamily)
-      .sortBy(_._1.toInt)
-      .collect()
-
-    val cmp = (1 to 100) zip retrieved
-
-    val ok = cmp.count (p => {
-      p._1.toInt == p._2._2 &&
-        p._1.toShort == p._2._3
-    })
-
-    sc.stop
-
-    ok should be (100)
+    } finally {
+      sc.stop
+    }
 
   }
+
+  "type conversion" should "support nulls" in {
+
+    val sparkConf = new SparkConf()
+    sparkConf.set("spark.master", "local")
+    sparkConf.set("spark.driver.allowMultipleContexts", "true")
+    sparkConf.setAppName("test")
+    val sc = new SparkContext(sparkConf)
+
+    try {
+
+      sc.parallelize(1 to 100)
+
+
+    } finally {
+      sc.stop
+    }
+
+  }
+
+  // TODO check nulls
 
 
 

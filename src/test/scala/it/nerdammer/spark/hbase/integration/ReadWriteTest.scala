@@ -67,20 +67,23 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     sparkConf.setAppName("test")
     val sc = new SparkContext(sparkConf)
 
-    sc.parallelize(1 to 1000)
-      .map(i => ("PIPPO-" + i.toString, i.toString, i))
-      .toHBaseTable(table).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
+    try {
+      sc.parallelize(1 to 1000)
+        .map(i => ("STR-" + i.toString, i.toString, i))
+        .toHBaseTable(table).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
 
-    val count = sc.hbaseTable[(String, String, Int)](table).inColumnFamily(columnFamily).select("column2", "column3")
-      .filter(t => t._3%2==0)
-      .filter(t => t._2.toInt % 4 == 0)
-      .count
+      val count = sc.hbaseTable[(String, String, Int)](table).inColumnFamily(columnFamily).select("column2", "column3")
+        .filter(t => t._3 % 2 == 0)
+        .filter(t => t._2.toInt % 4 == 0)
+        .count
 
+      count should be(250)
 
-    sc.stop
-
-    count should be (250)
+    } finally {
+      sc.stop
+    }
 
   }
 
+  // TODO clear message for unknown columns
 }

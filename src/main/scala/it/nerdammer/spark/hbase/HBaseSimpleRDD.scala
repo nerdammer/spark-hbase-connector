@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 /**
  * Created by Nicola Ferraro on 17/01/15.
  */
-class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result])
+class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result], builder: HBaseReaderBuilder[R])
                        (implicit mapper: FieldReader[R]) extends RDD[R](hadoopHBase) {
 
   override def getPartitions: Array[Partition] = firstParent[(ImmutableBytesWritable, Result)].partitions
@@ -24,7 +24,13 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
       .map(e => conversion(e._1, e._2))
   }
 
-  def conversion(key: ImmutableBytesWritable, row: Result) =
-    mapper.map(new HBaseDataHolder(Bytes.toString(key.get), row.listCells.map(c => CellUtil.cloneValue(c).array)))
+  def conversion(key: ImmutableBytesWritable, row: Result) = {
 
+    val columns = builder.columnsWithFamily
+      .map(t => (Bytes.toBytes(t._1), Bytes.toBytes(t._2)))
+      .map(t => row.getColumnLatestCell(t._1, t._2))
+      .map(c => CellUtil.cloneValue(c).array)
+
+    mapper.map(new HBaseDataHolder(Bytes.toString(key.get), columns))
+  }
 }
