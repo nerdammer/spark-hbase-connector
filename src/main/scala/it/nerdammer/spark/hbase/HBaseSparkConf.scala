@@ -20,7 +20,7 @@ case class HBaseSparkConf private[hbase] (
 
 object HBaseSparkConf {
   val DefaultHBaseHost = "localhost"
-  val DefaultHBaseRootDir = "/tmp"
+  val DefaultHBaseRootDir = "/hbase"
 
   def fromSparkConf(conf: SparkConf) = {
     HBaseSparkConf(
