@@ -20,7 +20,7 @@ Check also if the current branch is passing all tests in Travis-CI before checki
 
 ## Writing to HBase (Basic)
 
-Writing to HBase is very easy. Remember to import the implicit conversion:
+Writing to HBase is very easy. Remember to import the implicit conversions:
 
 ```scala
 import it.nerdammer.spark.hbase._
@@ -33,7 +33,7 @@ val rdd = sc.parallelize(1 to 100)
             .map(i => (i.toString, i+1, "Hello"))
 ```
 
-Tis *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**,
+This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**,
 the others will be assigned to columns.
 
 ```scala
@@ -48,7 +48,7 @@ You are done. HBase now contains *100* rows in table *mytable*, each row contain
 
 ## Reading from HBase (Basic)
 
-Reading from HBase is easier. Remember to import the implicit conversion:
+Reading from HBase is easier. Remember to import the implicit conversions:
 
 ```scala
 import it.nerdammer.spark.hbase._
@@ -66,6 +66,9 @@ Now *hBaseRDD* contains all data found in the table. Each object in the RDD is a
 the corresponding value of *column1* (Int) and *column2* (String).
 
 ## Other Topics
+
+### Filtering
+Supported (Doc to be completed)
 
 ### Managing Empty Columns
 Supported (Doc to be completed)
