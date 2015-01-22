@@ -37,11 +37,7 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
   "reading" should "work after writing" in {
 
-    val sparkConf = new SparkConf()
-    sparkConf.set("spark.master", "local")
-    sparkConf.set("spark.driver.allowMultipleContexts", "true")
-    sparkConf.setAppName("test")
-    val sc = new SparkContext(sparkConf)
+    val sc = IntegrationUtils.sparkContext
 
     val data = sc.parallelize(1 to 100).map(i => (i.toString, i.toString))
 
@@ -53,35 +49,25 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
       .inColumnFamily(columnFamily)
       .count
 
-    sc.stop
-
     count should be (100)
 
   }
 
   "reading" should "get the written values" in {
 
-    val sparkConf = new SparkConf()
-    sparkConf.set("spark.master", "local")
-    sparkConf.set("spark.driver.allowMultipleContexts", "true")
-    sparkConf.setAppName("test")
-    val sc = new SparkContext(sparkConf)
+    val sc = IntegrationUtils.sparkContext
 
-    try {
-      sc.parallelize(1 to 1000)
-        .map(i => ("STR-" + i.toString, i.toString, i))
-        .toHBaseTable(table).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
 
-      val count = sc.hbaseTable[(String, String, Int)](table).inColumnFamily(columnFamily).select("column2", "column3")
-        .filter(t => t._3 % 2 == 0)
-        .filter(t => t._2.toInt % 4 == 0)
-        .count
+    sc.parallelize(1 to 1000)
+      .map(i => ("STR-" + i.toString, i.toString, i))
+      .toHBaseTable(table).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
 
-      count should be(250)
+    val count = sc.hbaseTable[(String, String, Int)](table).inColumnFamily(columnFamily).select("column2", "column3")
+      .filter(t => t._3 % 2 == 0)
+      .filter(t => t._2.toInt % 4 == 0)
+      .count
 
-    } finally {
-      sc.stop
-    }
+    count should be(250)
 
   }
 
