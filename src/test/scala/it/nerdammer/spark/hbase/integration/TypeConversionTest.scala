@@ -8,34 +8,19 @@ import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-/**
- * Created by Nicola Ferraro on 20/01/15.
- */
 class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
   val tables = Seq(UUID.randomUUID().toString, UUID.randomUUID().toString)
   val columnFamilies = Seq("cfconv", "cfconv2")
 
   override def beforeAll() = {
-    val conf = HBaseSparkConf()
-    val admin = new HBaseAdmin(conf.createHadoopBaseConfig())
-
     (tables zip columnFamilies) foreach (t => {
-      val tableDesc = new HTableDescriptor(TableName.valueOf(t._1))
-      tableDesc.addFamily(new HColumnDescriptor(t._2))
-      admin.createTable(tableDesc)
+      IntegrationUtils.createTable(t._1, t._2)
     })
-
   }
 
   override def afterAll() = {
-    val conf = HBaseSparkConf()
-    val admin = new HBaseAdmin(conf.createHadoopBaseConfig())
-
-    tables.foreach(table => {
-      admin.disableTable(table)
-      admin.deleteTable(table)
-    })
+    tables.foreach(table => IntegrationUtils.dropTable(table))
   }
 
   "type conversion" should "work" in {

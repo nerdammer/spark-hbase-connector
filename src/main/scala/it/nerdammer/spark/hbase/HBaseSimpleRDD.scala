@@ -1,5 +1,6 @@
 package it.nerdammer.spark.hbase
 
+import it.nerdammer.spark.hbase.conversion.{HBaseData, FieldReader}
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
@@ -10,9 +11,6 @@ import org.apache.spark.{Partition, TaskContext}
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
-/**
- * Created by Nicola Ferraro on 17/01/15.
- */
 class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result], builder: HBaseReaderBuilder[R])
                        (implicit mapper: FieldReader[R]) extends RDD[R](hadoopHBase) {
 
@@ -30,6 +28,6 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
       .map(t => (Bytes.toBytes(t._1), Bytes.toBytes(t._2)))
       .map(t => if(row.containsColumn(t._1, t._2)) Some(CellUtil.cloneValue(row.getColumnLatestCell(t._1, t._2)).array) else None)
 
-    mapper.map(new HBaseDataHolder(Bytes.toString(key.get), columns))
+    mapper.map(new HBaseData(Bytes.toString(key.get), columns))
   }
 }

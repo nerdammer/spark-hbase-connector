@@ -3,9 +3,6 @@ package it.nerdammer.spark.hbase
 import org.apache.spark.SparkConf
 import org.scalatest.{Matchers, FlatSpec}
 
-/**
- * Created by Nicola Ferraro on 10/01/15.
- */
 class HBaseSparkConfTest extends FlatSpec with Matchers {
 
   "A default HBaseSparkConf" should "have a host property set to localhost" in {

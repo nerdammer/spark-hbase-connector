@@ -3,9 +3,6 @@ package it.nerdammer.spark.hbase
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.spark.SparkConf
 
-/**
- * Created by Nicola Ferraro on 09/01/15.
- */
 case class HBaseSparkConf private[hbase] (
   hbaseHost: String = HBaseSparkConf.DefaultHBaseHost,
   hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) {

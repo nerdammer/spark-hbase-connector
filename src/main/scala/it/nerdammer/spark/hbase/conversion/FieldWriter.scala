@@ -1,11 +1,6 @@
-package it.nerdammer.spark.hbase
+package it.nerdammer.spark.hbase.conversion
 
 import org.apache.hadoop.hbase.util.Bytes
-
-
-/**
- * Created by Nicola Ferraro on 21/01/15.
- */
 
 trait FieldWriter[T] extends Serializable {
   type HBaseColumn = Option[Array[Byte]]

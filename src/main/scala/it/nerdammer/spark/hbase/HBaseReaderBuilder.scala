@@ -1,5 +1,6 @@
 package it.nerdammer.spark.hbase
 
+import it.nerdammer.spark.hbase.conversion.FieldReader
 import org.apache.hadoop.hbase.client.Result
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
@@ -8,9 +9,6 @@ import org.apache.spark.rdd.{NewHadoopRDD, RDD}
 
 import scala.reflect.ClassTag
 
-/**
- * Created by Nicola Ferraro on 17/01/15.
- */
 case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       @transient sc: SparkContext,
       table: String,

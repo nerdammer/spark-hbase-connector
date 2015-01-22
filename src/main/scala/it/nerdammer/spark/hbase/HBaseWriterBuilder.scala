@@ -1,5 +1,6 @@
 package it.nerdammer.spark.hbase
 
+import it.nerdammer.spark.hbase.conversion.FieldWriter
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
@@ -11,15 +12,13 @@ import org.apache.spark.SparkContext._
 
 import scala.reflect.ClassTag
 
-/**
- * Created by Nicola Ferraro on 20/01/15.
- */
 case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       rdd: RDD[R],
       table: String,
       columnFamily: Option[String] = None,
-      columns: Iterable[String] = Seq.empty
-      )(implicit m: FieldWriter[R])
+      columns: Iterable[String] = Seq.empty,
+      salting: Iterable[String] = Seq.empty
+      )(implicit converter: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
 
@@ -37,15 +36,22 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       this.copy(columnFamily = Some(columnFamily))
     }
 
+    def withSalting(salting: Iterable[String]) = {
+      require(salting.size > 1, "Invalid salting. Two or more elements are required")
+      require(this.salting.isEmpty, "Salting has already been set")
+
+      this.copy(salting = salting)
+    }
+
 }
 
-class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit m: FieldWriter[R]) extends Serializable {
+class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit converter: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
 
   def toHBaseTable(table: String) = new HBaseWriterBuilder[R](rdd, table)
 
 }
 
-class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit writer: FieldWriter[R]) extends Serializable {
+class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converter: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
 
   def save(): Unit = {
 
@@ -55,20 +61,27 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit writer: 
     val job = Job.getInstance(conf)
     job.setOutputFormatClass(classOf[TableOutputFormat[String]])
 
+    val saltingProvider: Option[SaltingProvider[String]] =
+      if(builder.salting.isEmpty) None
+      else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = builder.rdd.map(r => {
-      val converted: Iterable[Option[Array[Byte]]] = writer.map(r)
+      val converted: Iterable[Option[Array[Byte]]] = converter.map(r)
       if(converted.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
-      val rowkey = converted.head.get
+      val rawRowKey = converted.head.get
       val columns = converted.drop(1)
 
       if(columns.size!=builder.columns.size) {
         throw new IllegalArgumentException(s"Wrong number of columns. Expected ${builder.columns.size} found ${columns.size}")
       }
 
-      val put = new Put(rowkey)
+      val rowKey =
+        if(saltingProvider.isEmpty) rawRowKey
+        else Bytes.toBytes(saltingProvider.get.nextSalting + Bytes.toString(rawRowKey))
+
+      val put = new Put(rowKey)
 
       builder.columns.zip(columns).foreach {
         case (name, Some(value)) => {

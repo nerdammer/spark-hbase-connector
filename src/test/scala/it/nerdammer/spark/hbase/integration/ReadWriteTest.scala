@@ -10,30 +10,14 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, Matchers, FlatSpec}
 import it.nerdammer.spark.hbase._
 
-/**
- * Created by Nicola Ferraro on 20/01/15.
- */
 class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
   val table: String = UUID.randomUUID().toString
   val columnFamily: String = "cf"
 
-  override def beforeAll() = {
-    val conf = HBaseSparkConf()
-    val admin = new HBaseAdmin(conf.createHadoopBaseConfig())
+  override def beforeAll() = IntegrationUtils.createTable(table, columnFamily)
 
-    val tableDesc = new HTableDescriptor(TableName.valueOf(table))
-    tableDesc.addFamily(new HColumnDescriptor(columnFamily))
-    admin.createTable(tableDesc)
-  }
-
-  override def afterAll() = {
-    val conf = HBaseSparkConf()
-    val admin = new HBaseAdmin(conf.createHadoopBaseConfig())
-
-    admin.disableTable(table)
-    admin.deleteTable(table)
-  }
+  override def afterAll() = IntegrationUtils.dropTable(table)
 
   "reading" should "work after writing" in {
 

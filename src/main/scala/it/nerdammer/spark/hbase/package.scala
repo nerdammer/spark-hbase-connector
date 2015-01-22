@@ -1,10 +1,10 @@
 package it.nerdammer.spark
 
-/**
- * Created by Nicola Ferraro on 10/01/15.
- */
+import it.nerdammer.spark.hbase.conversion.{FieldWriterConversions, FieldReaderConversions}
+
 package object hbase
                   extends HBaseSparkContextConversions
+                  with SaltingProviderConversions
                   with FieldReaderConversions
                   with FieldWriterConversions
                   with HBaseReaderBuilderConversions
