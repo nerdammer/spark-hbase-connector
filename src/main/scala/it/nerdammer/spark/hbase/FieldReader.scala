@@ -14,7 +14,16 @@ trait SingleColumnFieldReader[T] extends FieldReader[T] {
 
   def map(data: HBaseDataHolder): T =
     if(data.columns.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.columns.size}")
-    else columnMap(data.columns.head)
+    else columnMapWithOption(data.columns.head)
+
+  def columnMapWithOption(cols: Option[Array[Byte]]): T
+}
+
+trait SingleColumnConcreteFieldReader[T] extends SingleColumnFieldReader[T] {
+
+  def columnMapWithOption(cols: Option[Array[Byte]]) =
+    if(cols.nonEmpty) columnMap(cols.get)
+    else throw new IllegalArgumentException("Null value assigned to concrete class. Use Option[T] instead")
 
   def columnMap(cols: Array[Byte]): T
 }
@@ -27,7 +36,7 @@ trait TupleFieldReader[T <: Product] extends FieldReader[T] {
     if(data.columns.size==n)
       tupleMap(data)
     else if(data.columns.size==n-1)
-      tupleMap(new HBaseDataHolder(data.rowKey, Bytes.toBytes(data.rowKey) :: data.columns.toList))
+      tupleMap(new HBaseDataHolder(data.rowKey, Some(Bytes.toBytes(data.rowKey)) :: data.columns.toList))
     else
       throw new IllegalArgumentException(s"Unexpected number of columns: expected $n or ${n-1}, returned ${data.columns.size}")
 
@@ -38,36 +47,48 @@ trait FieldReaderConversions extends Serializable {
 
   // Simple types
 
-  implicit def intReader: FieldReader[Int] = new SingleColumnFieldReader[Int] {
+  implicit def intReader: FieldReader[Int] = new SingleColumnConcreteFieldReader[Int] {
     def columnMap(cols: Array[Byte]): Int = Bytes.toInt(cols)
   }
 
-  implicit def longReader: FieldReader[Long] = new SingleColumnFieldReader[Long] {
+  implicit def longReader: FieldReader[Long] = new SingleColumnConcreteFieldReader[Long] {
     def columnMap(cols: Array[Byte]): Long = Bytes.toLong(cols)
   }
 
-  implicit def shortReader: FieldReader[Short] = new SingleColumnFieldReader[Short] {
+  implicit def shortReader: FieldReader[Short] = new SingleColumnConcreteFieldReader[Short] {
     def columnMap(cols: Array[Byte]): Short = Bytes.toShort(cols)
   }
 
-  implicit def doubleReader: FieldReader[Double] = new SingleColumnFieldReader[Double] {
+  implicit def doubleReader: FieldReader[Double] = new SingleColumnConcreteFieldReader[Double] {
     def columnMap(cols: Array[Byte]): Double = Bytes.toDouble(cols)
   }
 
-  implicit def floatReader: FieldReader[Float] = new SingleColumnFieldReader[Float] {
+  implicit def floatReader: FieldReader[Float] = new SingleColumnConcreteFieldReader[Float] {
     def columnMap(cols: Array[Byte]): Float = Bytes.toFloat(cols)
   }
 
-  implicit def booleanReader: FieldReader[Boolean] = new SingleColumnFieldReader[Boolean] {
+  implicit def booleanReader: FieldReader[Boolean] = new SingleColumnConcreteFieldReader[Boolean] {
     def columnMap(cols: Array[Byte]): Boolean = Bytes.toBoolean(cols)
   }
 
-  implicit def bigDecimalReader: FieldReader[BigDecimal] = new SingleColumnFieldReader[BigDecimal] {
+  implicit def bigDecimalReader: FieldReader[BigDecimal] = new SingleColumnConcreteFieldReader[BigDecimal] {
     def columnMap(cols: Array[Byte]): BigDecimal = Bytes.toBigDecimal(cols)
   }
 
-  implicit def stringReader: FieldReader[String] = new SingleColumnFieldReader[String] {
+  implicit def stringReader: FieldReader[String] = new SingleColumnConcreteFieldReader[String] {
     def columnMap(cols: Array[Byte]): String = Bytes.toString(cols)
+  }
+
+  // Options
+
+  implicit def optionReader[T](implicit c: FieldReader[T]): FieldReader[Option[T]] = new FieldReader[Option[T]] {
+    def map(data: HBaseDataHolder): Option[T] =
+      if(data.columns.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.columns.size}")
+      else {
+        if(!classOf[SingleColumnConcreteFieldReader[T]].isAssignableFrom(c.getClass)) throw new IllegalArgumentException("Option[T] can be used only with primitive values")
+        if(data.columns.head.nonEmpty) Some(c.map(data))
+        else None
+      }
   }
 
   // Tuples

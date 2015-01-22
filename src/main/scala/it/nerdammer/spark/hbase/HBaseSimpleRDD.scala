@@ -28,8 +28,7 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
 
     val columns = builder.columnsWithFamily
       .map(t => (Bytes.toBytes(t._1), Bytes.toBytes(t._2)))
-      .map(t => row.getColumnLatestCell(t._1, t._2))
-      .map(c => CellUtil.cloneValue(c).array)
+      .map(t => if(row.containsColumn(t._1, t._2)) Some(CellUtil.cloneValue(row.getColumnLatestCell(t._1, t._2)).array) else None)
 
     mapper.map(new HBaseDataHolder(Bytes.toString(key.get), columns))
   }

@@ -75,7 +75,7 @@ class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  
 
   }
 
-  "type conversion" should "support nulls" in {
+  "type conversion" should "support empty values" in {
 
     val sparkConf = new SparkConf()
     sparkConf.set("spark.master", "local")
@@ -86,15 +86,29 @@ class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  
     try {
 
       sc.parallelize(1 to 100)
+        .map(i => (i.toString, i, None.asInstanceOf[Option[Short]]))
+        .toHBaseTable(table)
+        .inColumnFamily(columnFamily)
+        .toColumns("myint", "myshort")
+        .save()
 
+
+      val chk = sc.hbaseTable[(String, Option[Int], Option[Short], Option[Long], Option[Boolean], Option[Double], Option[Float], Option[BigDecimal], Option[String])](table)
+        .inColumnFamily(columnFamily)
+        .select("myint", "myshort", "mynonexistentlong", "mynonexistentbool", "mynonexistentdouble", "mynonexistentfloat", "mynonexistentbigd", "mynonexistentstr")
+        .filter(r => r match {
+        case (s, Some(i), None, None, None, None, None, None, None) => true
+        case _ => false
+        })
+        .count
+
+      chk should be (100)
 
     } finally {
       sc.stop
     }
 
   }
-
-  // TODO check nulls
 
 
 

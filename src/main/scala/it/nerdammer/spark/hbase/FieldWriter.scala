@@ -8,45 +8,58 @@ import org.apache.hadoop.hbase.util.Bytes
  */
 
 trait FieldWriter[T] extends Serializable {
-  type HBaseColumns = Iterable[Array[Byte]]
+  type HBaseColumn = Option[Array[Byte]]
+  type HBaseColumns = Iterable[HBaseColumn]
 
   def map(data: T): HBaseColumns
 }
 
+trait SingleColumnFieldWriter[T] extends FieldWriter[T] {
+  override def map(data: T): HBaseColumns = Seq(mapColumn(data))
+
+  def mapColumn(data: T): HBaseColumn
+}
+
 trait FieldWriterConversions extends Serializable {
 
-  implicit def intWriter: FieldWriter[Int] = new FieldWriter[Int] {
-    override def map(data: Int): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def intWriter: FieldWriter[Int] = new SingleColumnFieldWriter[Int] {
+    override def mapColumn(data: Int): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def longWriter: FieldWriter[Long] = new FieldWriter[Long] {
-    override def map(data: Long): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def longWriter: FieldWriter[Long] = new SingleColumnFieldWriter[Long] {
+    override def mapColumn(data: Long): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def shortWriter: FieldWriter[Short] = new FieldWriter[Short] {
-    override def map(data: Short): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def shortWriter: FieldWriter[Short] = new SingleColumnFieldWriter[Short] {
+    override def mapColumn(data: Short): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def doubleWriter: FieldWriter[Double] = new FieldWriter[Double] {
-    override def map(data: Double): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def doubleWriter: FieldWriter[Double] = new SingleColumnFieldWriter[Double] {
+    override def mapColumn(data: Double): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def floatWriter: FieldWriter[Float] = new FieldWriter[Float] {
-    override def map(data: Float): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def floatWriter: FieldWriter[Float] = new SingleColumnFieldWriter[Float] {
+    override def mapColumn(data: Float): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def booleanWriter: FieldWriter[Boolean] = new FieldWriter[Boolean] {
-    override def map(data: Boolean): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def booleanWriter: FieldWriter[Boolean] = new SingleColumnFieldWriter[Boolean] {
+    override def mapColumn(data: Boolean): HBaseColumn = Some(Bytes.toBytes(data))
   }
 
-  implicit def bigDecimalWriter: FieldWriter[BigDecimal] = new FieldWriter[BigDecimal] {
-    override def map(data: BigDecimal): HBaseColumns = Seq(Bytes.toBytes(data.bigDecimal))
+  implicit def bigDecimalWriter: FieldWriter[BigDecimal] = new SingleColumnFieldWriter[BigDecimal] {
+    override def mapColumn(data: BigDecimal): HBaseColumn = Some(Bytes.toBytes(data.bigDecimal))
   }
 
-  implicit def stringWriter: FieldWriter[String] = new FieldWriter[String] {
-    override def map(data: String): HBaseColumns = Seq(Bytes.toBytes(data))
+  implicit def stringWriter: FieldWriter[String] = new SingleColumnFieldWriter[String] {
+    override def mapColumn(data: String): HBaseColumn = Some(Bytes.toBytes(data))
   }
-  
+
+  // Options
+
+  implicit def optionWriter[T](implicit c: FieldWriter[T]): FieldWriter[Option[T]] = new FieldWriter[Option[T]] {
+    override def map(data: Option[T]): HBaseColumns = if(data.nonEmpty) c.map(data.get) else Seq(None)
+  }
+
   // Tuples
 
 

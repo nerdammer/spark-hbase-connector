@@ -57,11 +57,11 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit writer: 
 
 
     val transRDD = builder.rdd.map(r => {
-      val converted: Iterable[Array[Byte]] = writer.map(r)
+      val converted: Iterable[Option[Array[Byte]]] = writer.map(r)
       if(converted.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
-      val rowkey = converted.head
+      val rowkey = converted.head.get
       val columns = converted.drop(1)
 
       if(columns.size!=builder.columns.size) {
@@ -71,12 +71,13 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit writer: 
       val put = new Put(rowkey)
 
       builder.columns.zip(columns).foreach {
-        case (name, value) => {
+        case (name, Some(value)) => {
           val family = if(name.contains(':')) Bytes.toBytes(name.substring(0, name.indexOf(':'))) else Bytes.toBytes(builder.columnFamily.get)
           val column = if(name.contains(':')) Bytes.toBytes(name.substring(name.indexOf(':') + 1)) else Bytes.toBytes(name)
 
           put.add(family, column, value)
         }
+        case _ => {}
       }
 
       (new ImmutableBytesWritable, put)
