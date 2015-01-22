@@ -68,7 +68,19 @@ the corresponding value of *column1* (Int) and *column2* (String).
 ## Other Topics
 
 ### Filtering
-Supported (Doc to be completed)
+It is possible to filter the results by prefixes of the row key. Filtering also supports additional salting prefixes
+(see the [salting](#salting) section).
+
+```scala
+val rdd = sc.hbaseTable[(String, String)]("table")
+      .select("col")
+      .inColumnFamily(columnFamily)
+      .withStartRow("00000")
+      .withStopRow("00500")
+```
+
+The example above retrieves all rows having a row key *greater or equal* to `00000` and *lower* than `00500`.
+The options `withStartRow` and `withStopRow` can also be used separately.
 
 ### Managing Empty Columns
 Supported (Doc to be completed)
@@ -76,9 +88,35 @@ Supported (Doc to be completed)
 ### Using different column families
 Supported (Doc to be completed)
 
+### Setting the HBase host
+The HBase Zookeeper quorum host can be set in multiple ways.
+
+(1) Passing the host to the `spark-submit` command:
+
+
+    spark-submit --conf spark.hbase.host=thehost ...
+
+
+(2) If you have access to the JVM parameters:
+
+
+    java -Dspark.hbase.host=thehost -jar ....
+
+
+(3) Using the *scala* code:
+
+
+```scala
+val sparkConf = new SparkConf()
+...
+sparkConf.set("spark.hbase.host", "thehost")
+...
+val sc = new SparkContext(sparkConf)
+```
+
 ## Advanced
 
-### Salting Prefixes
+### Salting Prefixes<a name="salting"></a>
 Supported (Doc to be completed)
 
 ### Custom Mapping
