@@ -65,6 +65,16 @@ val hBaseRDD = sc.hbaseTable[(String, Int, String)]("mytable")
 Now *hBaseRDD* contains all data found in the table. Each object in the RDD is a tuple conaining (in order) the *row id*,
 the corresponding value of *column1* (Int) and *column2* (String).
 
+If you don't want the *row id* and want only to see the columns, just remove the first element from the tuple specs:
+
+```scala
+val hBaseRDD = sc.hbaseTable[(Int, String)]("mytable")
+    .select("column1", "column2")
+    .inColumnFamily("mycf")
+```
+
+This way, only the columns that you have chosen will be returned.
+
 ## Other Topics
 
 ### Filtering
@@ -83,10 +93,40 @@ The example above retrieves all rows having a row key *greater or equal* to `000
 The options `withStartRow` and `withStopRow` can also be used separately.
 
 ### Managing Empty Columns
-Supported (Doc to be completed)
+Empty columns are managed by using `Option[T]` types:
+
+```scala
+val rdd = sc.hbaseTable[(Option[String], String)]("table")
+      .select("column1", "column2")
+      .inColumnFamily(columnFamily)
+
+rdd.foreach(t => {
+    if(t._1.nonEmpty) println(t._1.get)
+})
+```
+
+You can use the `Option[T]` type every time you are not sure whether a given column is present in your HBase RDD.
 
 ### Using different column families
-Supported (Doc to be completed)
+Different column families can be used both when reading or writing an RDD.
+
+```scala
+data.toHBaseTable("mytable")
+      .toColumns("column1", "cf2:column2")
+      .inColumnFamily("cf1")
+      .save()
+```
+
+In the example above, `cf1` refers only to `column1`, because `cf2:column2` is already *fully qualified*.
+
+```scala
+val count = sc.hbaseTable[(String, String)]("mytable")
+      .select("cf1:column1", "column2")
+      inColumnFamily("cf2")
+      .count
+```
+
+In the *reading example* above, the default column family `cf2` applies only to `column2`.
 
 ### Setting the HBase host
 The HBase Zookeeper quorum host can be set in multiple ways.
@@ -117,8 +157,34 @@ val sc = new SparkContext(sparkConf)
 ## Advanced
 
 ### Salting Prefixes<a name="salting"></a>
-Supported (Doc to be completed)
+
+Salting is supported in reads and writes. Only *string valued row id* are supported at the moment, so salting prefixes
+should also be of *String* type.
+
+```scala
+sc.parallelize(1 to 1000)
+      .map(i => (pad(i.toString, 5), "A value"))
+      .toHBaseTable(table)
+      .inColumnFamily(columnFamily)
+      .toColumns("col")
+      .withSalting((0 to 9).map(s => s.toString))
+      .save()
+```
+
+In the example above, each row id is composed of *5* digits: from `00001` to `01000`.
+The *salting* property adds a random digit in front, so you will have records like: `800001`, `600031`, ...
+
+When reading the RDD, you have just to declare the salting type used in the table and
+ignore it when using bounds (startRow or stopRow). The library takes care of dealing with salting.
+
+```scala
+val rdd = sc.hbaseTable[String](table)
+      .select("col")
+      .inColumnFamily(columnFamily)
+      .withStartRow("00501")
+      .withSalting((0 to 9).map(s => s.toString))
+```
 
 ### Custom Mapping
-Supported (Doc to be completed)
+To be implemented
 

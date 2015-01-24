@@ -12,12 +12,12 @@ import it.nerdammer.spark.hbase._
 
 class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
-  val table: String = UUID.randomUUID().toString
+  val tables: Seq[String] = Seq(UUID.randomUUID().toString, UUID.randomUUID().toString, UUID.randomUUID().toString)
   val columnFamily: String = "cf"
 
-  override def beforeAll() = IntegrationUtils.createTable(table, columnFamily)
+  override def beforeAll() = tables foreach {IntegrationUtils.createTable(_, columnFamily)}
 
-  override def afterAll() = IntegrationUtils.dropTable(table)
+  override def afterAll() = tables foreach {IntegrationUtils.dropTable(_)}
 
   "reading" should "work after writing" in {
 
@@ -26,9 +26,9 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val data = sc.parallelize(1 to 100).map(i => (i.toString, i.toString))
 
 
-    data.toHBaseTable(table).toColumns("column1").inColumnFamily(columnFamily).save()
+    data.toHBaseTable(tables(0)).toColumns("column1").inColumnFamily(columnFamily).save()
 
-    val count = sc.hbaseTable[(String, String)](table)
+    val count = sc.hbaseTable[(String, String)](tables(0))
       .select("column1")
       .inColumnFamily(columnFamily)
       .count
@@ -43,10 +43,10 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
 
     sc.parallelize(1 to 1000)
-      .map(i => ("STR-" + i.toString, i.toString, i))
-      .toHBaseTable(table).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
+      .map(i => (i.toString, i.toString, i))
+      .toHBaseTable(tables(1)).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
 
-    val count = sc.hbaseTable[(String, String, Int)](table).inColumnFamily(columnFamily).select("column2", "column3")
+    val count = sc.hbaseTable[(String, String, Int)](tables(1)).inColumnFamily(columnFamily).select("column2", "column3")
       .filter(t => t._3 % 2 == 0)
       .filter(t => t._2.toInt % 4 == 0)
       .count
@@ -54,6 +54,25 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     count should be(250)
 
   }
+
+  "reading" should "get the written values if I do not care about row id" in {
+
+    val sc = IntegrationUtils.sparkContext
+
+
+    sc.parallelize(1 to 1000)
+      .map(i => ("STR-" + i.toString, i.toString, i))
+      .toHBaseTable(tables(2)).toColumns("column2", "column3").inColumnFamily(columnFamily).save()
+
+    val count = sc.hbaseTable[(String, Int)](tables(2)).inColumnFamily(columnFamily).select("column2", "column3")
+      .filter(t => t._2 % 2 == 0)
+      .filter(t => t._1.toInt % 4 == 0)
+      .count
+
+    count should be(250)
+  }
+
+
 
   // TODO clear message for unknown columns
 }

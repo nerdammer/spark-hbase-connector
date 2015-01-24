@@ -15,12 +15,18 @@ object IntegrationUtils extends Serializable {
     new SparkContext(sparkConf)
   }
 
-  def createTable(table: String, columnFamily: String) = {
+  def createTable(table: String, columnFamily: String): Unit = createTable(table, Seq(columnFamily))
+
+
+  def createTable(table: String, columnFamilies: Seq[String]): Unit = {
     val conf = HBaseSparkConf()
     val admin = new HBaseAdmin(conf.createHadoopBaseConfig())
 
     val tableDesc = new HTableDescriptor(TableName.valueOf(table))
-    tableDesc.addFamily(new HColumnDescriptor(columnFamily))
+    columnFamilies.foreach(cf => {
+      tableDesc.addFamily(new HColumnDescriptor(cf))
+    })
+
     admin.createTable(tableDesc)
   }
 
