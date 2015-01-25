@@ -225,7 +225,6 @@ implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
     )
 
     override def defaultColumns = Seq("prg", "name")
-    }
 }
 ```
 
