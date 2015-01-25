@@ -88,9 +88,14 @@ trait HBaseReaderBuilderConversions extends Serializable {
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
 
+    val columnNames =
+      if(builder.columns.nonEmpty) builder.columns
+      else if(mapper.defaultColumns.nonEmpty) mapper.defaultColumns
+      else throw new IllegalArgumentException("Columns to retrieve are undefined: use the reader builder or the FieldReader")
+
     val columns =
-      if(builder.columnFamily.isEmpty) builder.columns
-      else builder.columns map (c => {
+      if(builder.columnFamily.isEmpty) columnNames
+      else columnNames map (c => {
         if(c.indexOf(':') >= 0) c
         else builder.columnFamily.get + ':' + c
       })

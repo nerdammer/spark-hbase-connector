@@ -186,5 +186,63 @@ val rdd = sc.hbaseTable[String](table)
 ```
 
 ### Custom Mapping
-To be implemented
 
+Custom mapping can be used in place of the default tuple-mapping algorithm. Just define one custom class:
+
+```scala
+class MyData(val id: Int, val prg: Int, val name: String) extends Serializable {
+
+}
+```
+
+Then you can define an *implicit* writer for that kind of objects:
+
+```scala
+implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
+    override def map(data: MyData): HBaseData = new HBaseData(
+      Seq(
+        Some(Bytes.toBytes(data.id)),
+        Some(Bytes.toBytes(data.prg)),
+        Some(Bytes.toBytes(data.name))
+      ),
+      Seq(
+        None,
+        Some("prg"),
+        Some("name")
+      )
+    )
+}
+```
+
+And you can define an *implicit* reader:
+
+```scala
+implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
+override def map(data: HBaseData): MyData = new MyData(
+  Bytes.toInt(data.cells.head.get),
+  Bytes.toInt(data.cells.drop(1).head.get),
+  Bytes.toString(data.cells.drop(2).head.get)
+)
+
+override def defaultColumns = Seq("prg", "name")
+}
+```
+
+
+Once you have done, make sure that the implicits are imported and that it does not produce a non-serializable task (Spark will check it at runtime).
+You can use your converter easily:
+
+```scala
+val data = sc.parallelize(1 to 100).map(i => new MyData(i, i, "Name" + i.toString))
+// data is an RDD[MyData]
+
+data.toHBaseTable("mytable")
+  .inColumnFamily("mycf")
+  .save()
+
+val read = sc.hbaseTable[MyData]("mytable")
+  .inColumnFamily("mycf")
+
+```
+
+Now *MyData* can be used to encode data *read-from* and *written-to* HBase.

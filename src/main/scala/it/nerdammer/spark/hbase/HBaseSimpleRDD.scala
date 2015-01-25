@@ -24,11 +24,23 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
 
   def conversion(key: ImmutableBytesWritable, row: Result) = {
 
-    val columns = builder.columnsWithFamily
+    val columnNamesFC =
+      if(builder.columns.nonEmpty) builder.columnsWithFamily
+      else mapper.defaultColumns.map(c => {
+        if(c.contains(":")) (c.substring(0, c.indexOf(":")), c.substring(c.indexOf(":") + 1))
+        else (builder.columnFamily.get, c)
+      })
+
+    val columns = columnNamesFC
       .map(t => (Bytes.toBytes(t._1), Bytes.toBytes(t._2)))
       .map(t => if(row.containsColumn(t._1, t._2)) Some(CellUtil.cloneValue(row.getColumnLatestCell(t._1, t._2)).array) else None)
       .toList
 
-    mapper.map(new HBaseData(Some(key.get) :: columns))
+    val columnNames = builder
+      .columnsWithFamily()
+      .map(t => Some(t._1 + ":" + t._2))
+      .toList
+
+    mapper.map(new HBaseData(Some(key.get) :: columns, None :: columnNames))
   }
 }

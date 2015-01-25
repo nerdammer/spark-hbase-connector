@@ -1,6 +1,6 @@
 package it.nerdammer.spark.hbase
 
-import it.nerdammer.spark.hbase.conversion.FieldWriter
+import it.nerdammer.spark.hbase.conversion.{HBaseData, FieldWriter}
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
@@ -66,14 +66,20 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converte
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = builder.rdd.map(r => {
-      val converted: Iterable[Option[Array[Byte]]] = converter.map(r).cells
-      if(converted.size<2) {
+      val convertedData: HBaseData = converter.map(r)
+      if(convertedData.cells.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
-      val rawRowKey = converted.head.get
-      val columns = converted.drop(1)
 
-      if(columns.size!=builder.columns.size) {
+      val columnsNames =
+        if(builder.columns.nonEmpty) builder.columns
+        else if(convertedData.names.size>1) convertedData.names.drop(1).map(_.get)
+        else throw new IllegalArgumentException("Columns not declared neither in RDD builder nor in FieldWriter")
+
+      val rawRowKey = convertedData.cells.head.get
+      val columns = convertedData.cells.drop(1)
+
+      if(columns.size!=columnsNames.size) {
         throw new IllegalArgumentException(s"Wrong number of columns. Expected ${builder.columns.size} found ${columns.size}")
       }
 
@@ -83,7 +89,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converte
 
       val put = new Put(rowKey)
 
-      builder.columns.zip(columns).foreach {
+      columnsNames.zip(columns).foreach {
         case (name, Some(value)) => {
           val family = if(name.contains(':')) Bytes.toBytes(name.substring(0, name.indexOf(':'))) else Bytes.toBytes(builder.columnFamily.get)
           val column = if(name.contains(':')) Bytes.toBytes(name.substring(name.indexOf(':') + 1)) else Bytes.toBytes(name)
