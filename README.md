@@ -218,19 +218,21 @@ And you can define an *implicit* reader:
 
 ```scala
 implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
-override def map(data: HBaseData): MyData = new MyData(
-  Bytes.toInt(data.cells.head.get),
-  Bytes.toInt(data.cells.drop(1).head.get),
-  Bytes.toString(data.cells.drop(2).head.get)
-)
+    override def map(data: HBaseData): MyData = new MyData(
+      Bytes.toInt(data.cells.head.get),
+      Bytes.toInt(data.cells.drop(1).head.get),
+      Bytes.toString(data.cells.drop(2).head.get)
+    )
 
-override def defaultColumns = Seq("prg", "name")
+    override def defaultColumns = Seq("prg", "name")
+    }
 }
 ```
 
 
 Once you have done, make sure that the implicits are imported and that it does not produce a non-serializable task (Spark will check it at runtime).
-You can use your converter easily:
+
+You can now use your converters easily:
 
 ```scala
 val data = sc.parallelize(1 to 100).map(i => new MyData(i, i, "Name" + i.toString))
@@ -244,5 +246,3 @@ val read = sc.hbaseTable[MyData]("mytable")
   .inColumnFamily("mycf")
 
 ```
-
-Now *MyData* can be used to encode data *read-from* and *written-to* HBase.
