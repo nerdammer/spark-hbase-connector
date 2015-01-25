@@ -66,7 +66,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converte
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = builder.rdd.map(r => {
-      val converted: Iterable[Option[Array[Byte]]] = converter.map(r)
+      val converted: Iterable[Option[Array[Byte]]] = converter.map(r).cells
       if(converted.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
