@@ -199,18 +199,14 @@ Then you can define an *implicit* writer for that kind of objects:
 
 ```scala
 implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
-    override def map(data: MyData): HBaseData = new HBaseData(
+    override def map(data: MyData): HBaseData =
       Seq(
         Some(Bytes.toBytes(data.id)),
         Some(Bytes.toBytes(data.prg)),
         Some(Bytes.toBytes(data.name))
-      ),
-      Seq(
-        None,
-        Some("prg"),
-        Some("name")
       )
-    )
+
+    override def columns = Seq("prg", "name")
 }
 ```
 
@@ -219,15 +215,14 @@ And you can define an *implicit* reader:
 ```scala
 implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
     override def map(data: HBaseData): MyData = new MyData(
-      Bytes.toInt(data.cells.head.get),
-      Bytes.toInt(data.cells.drop(1).head.get),
-      Bytes.toString(data.cells.drop(2).head.get)
+      Bytes.toInt(data.head.get),
+      Bytes.toInt(data.drop(1).head.get),
+      Bytes.toString(data.drop(2).head.get)
     )
 
-    override def defaultColumns = Seq("prg", "name")
+    override def columns = Seq("prg", "name")
 }
 ```
-
 
 Once you have done, make sure that the implicits are imported and that it does not produce a non-serializable task (Spark will check it at runtime).
 

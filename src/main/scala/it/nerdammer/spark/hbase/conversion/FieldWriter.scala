@@ -2,13 +2,13 @@ package it.nerdammer.spark.hbase.conversion
 
 import org.apache.hadoop.hbase.util.Bytes
 
-trait FieldWriter[T] extends Serializable {
+trait FieldWriter[T] extends FieldMapper {
   
   def map(data: T): HBaseData
 }
 
 trait SingleColumnFieldWriter[T] extends FieldWriter[T] {
-  override def map(data: T): HBaseData = new HBaseData(Seq(mapColumn(data)), Seq(None))
+  override def map(data: T): HBaseData = Seq(mapColumn(data))
 
   def mapColumn(data: T): Option[Array[Byte]]
 }
@@ -50,7 +50,7 @@ trait FieldWriterConversions extends Serializable {
   // Options
 
   implicit def optionWriter[T](implicit c: FieldWriter[T]): FieldWriter[Option[T]] = new FieldWriter[Option[T]] {
-    override def map(data: Option[T]): HBaseData = if(data.nonEmpty) c.map(data.get) else new HBaseData(Seq(None), Seq(None))
+    override def map(data: Option[T]): HBaseData = if(data.nonEmpty) c.map(data.get) else Seq(None)
   }
 
   // Tuples

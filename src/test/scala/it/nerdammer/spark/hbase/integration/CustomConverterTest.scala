@@ -3,7 +3,7 @@ package it.nerdammer.spark.hbase.integration
 import java.util.UUID
 
 import it.nerdammer.spark.hbase._
-import it.nerdammer.spark.hbase.conversion.{FieldReader, HBaseData, FieldWriter}
+import it.nerdammer.spark.hbase.conversion.{FieldReader, FieldWriter}
 import it.nerdammer.spark.hbase.integration.CustomConverterTest.MyData
 import org.apache.hadoop.hbase.util.Bytes
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
@@ -47,29 +47,25 @@ object CustomConverterTest extends Serializable {
   }
 
   implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
-    override def map(data: MyData): HBaseData = new HBaseData(
+    override def map(data: MyData): HBaseData =
       Seq(
         Some(Bytes.toBytes(data.id)),
         Some(Bytes.toBytes(data.prg)),
         Some(Bytes.toBytes(data.name))
-      ),
-      Seq(
-        None,
-        Some("prg"),
-        Some("name")
       )
-    )
+
+    override def columns = Seq("prg", "name")
   }
 
 
   implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
     override def map(data: HBaseData): MyData = new MyData(
-      Bytes.toInt(data.cells.head.get),
-      Bytes.toInt(data.cells.drop(1).head.get),
-      Bytes.toString(data.cells.drop(2).head.get)
+      Bytes.toInt(data.head.get),
+      Bytes.toInt(data.drop(1).head.get),
+      Bytes.toString(data.drop(2).head.get)
     )
 
-    override def defaultColumns = Seq("prg", "name")
+    override def columns = Seq("prg", "name")
   }
 
 }

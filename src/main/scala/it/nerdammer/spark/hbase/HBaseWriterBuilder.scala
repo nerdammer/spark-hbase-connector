@@ -1,12 +1,11 @@
 package it.nerdammer.spark.hbase
 
-import it.nerdammer.spark.hbase.conversion.{HBaseData, FieldWriter}
+import it.nerdammer.spark.hbase.conversion.FieldWriter
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.{rdd}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext._
 
@@ -18,7 +17,7 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       columnFamily: Option[String] = None,
       columns: Iterable[String] = Seq.empty,
       salting: Iterable[String] = Seq.empty
-      )(implicit converter: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
+      )(implicit mapper: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
 
@@ -45,13 +44,13 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
 
 }
 
-class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit converter: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
+class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
 
   def toHBaseTable(table: String) = new HBaseWriterBuilder[R](rdd, table)
 
 }
 
-class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converter: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
+class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
 
   def save(): Unit = {
 
@@ -66,18 +65,15 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converte
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = builder.rdd.map(r => {
-      val convertedData: HBaseData = converter.map(r)
-      if(convertedData.cells.size<2) {
+      val convertedData: Iterable[Option[Array[Byte]]] = mapper.map(r)
+      if(convertedData.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
 
-      val columnsNames =
-        if(builder.columns.nonEmpty) builder.columns
-        else if(convertedData.names.size>1) convertedData.names.drop(1).map(_.get)
-        else throw new IllegalArgumentException("Columns not declared neither in RDD builder nor in FieldWriter")
+      val columnsNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
 
-      val rawRowKey = convertedData.cells.head.get
-      val columns = convertedData.cells.drop(1)
+      val rawRowKey = convertedData.head.get
+      val columns = convertedData.drop(1)
 
       if(columns.size!=columnsNames.size) {
         throw new IllegalArgumentException(s"Wrong number of columns. Expected ${builder.columns.size} found ${columns.size}")
@@ -109,8 +105,8 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit converte
 
 trait HBaseWriterBuilderConversions extends Serializable {
 
-  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R])(implicit m: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](rdd)
+  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](rdd)
 
-  implicit def writerBuilderToWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit m: FieldWriter[R]): HBaseWriter[R] = new HBaseWriter[R](builder)
+  implicit def writerBuilderToWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R]): HBaseWriter[R] = new HBaseWriter[R](builder)
 
 }

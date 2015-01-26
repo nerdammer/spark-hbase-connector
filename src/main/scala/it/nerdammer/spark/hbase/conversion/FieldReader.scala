@@ -2,21 +2,19 @@ package it.nerdammer.spark.hbase.conversion
 
 import org.apache.hadoop.hbase.util.Bytes
 
-trait FieldReader[T] extends Serializable {
+trait FieldReader[T] extends FieldMapper {
   def map(data: HBaseData): T
-
-  def defaultColumns: Iterable[String] = Iterable.empty
 }
 
 trait SingleColumnFieldReader[T] extends FieldReader[T] {
 
   def map(data: HBaseData): T =
-    if(data.cells.size==1)
-      columnMapWithOption(data.cells.head)
-    else if(data.cells.size==2)
-      columnMapWithOption(data.cells.drop(1).head)
+    if(data.size==1)
+      columnMapWithOption(data.head)
+    else if(data.size==2)
+      columnMapWithOption(data.drop(1).head)
     else
-      throw new IllegalArgumentException(s"Unexpected number of columns: expected 1 or 2, returned ${data.cells.size}")
+      throw new IllegalArgumentException(s"Unexpected number of columns: expected 1 or 2, returned ${data.size}")
 
   def columnMapWithOption(cols: Option[Array[Byte]]): T
 }
@@ -35,12 +33,12 @@ trait TupleFieldReader[T <: Product] extends FieldReader[T] {
   val n: Int
 
   def map(data: HBaseData): T =
-    if(data.cells.size==n)
+    if(data.size==n)
       tupleMap(data)
-    else if(data.cells.size==n+1)
+    else if(data.size==n+1)
       tupleMap(data.drop(1))
     else
-      throw new IllegalArgumentException(s"Unexpected number of columns: expected $n or ${n-1}, returned ${data.cells.size}")
+      throw new IllegalArgumentException(s"Unexpected number of columns: expected $n or ${n-1}, returned ${data.size}")
 
   def tupleMap(data: HBaseData): T
 }
@@ -85,10 +83,10 @@ trait FieldReaderConversions extends Serializable {
 
   implicit def optionReader[T](implicit c: FieldReader[T]): FieldReader[Option[T]] = new FieldReader[Option[T]] {
     def map(data: HBaseData): Option[T] =
-      if(data.cells.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.cells.size}")
+      if(data.size!=1) throw new IllegalArgumentException(s"Unexpected number of columns: expected 1, returned ${data.size}")
       else {
         if(!classOf[SingleColumnConcreteFieldReader[T]].isAssignableFrom(c.getClass)) throw new IllegalArgumentException("Option[T] can be used only with primitive values")
-        if(data.cells.head.nonEmpty) Some(c.map(data))
+        if(data.head.nonEmpty) Some(c.map(data))
         else None
       }
   }
@@ -100,8 +98,8 @@ trait FieldReaderConversions extends Serializable {
     val n = 2
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
       (m1.map(h1), m2.map(h2))
     }
   }
@@ -111,9 +109,9 @@ trait FieldReaderConversions extends Serializable {
     val n = 3
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3))
     }
   }
@@ -123,10 +121,10 @@ trait FieldReaderConversions extends Serializable {
     val n = 4
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4))
     }
   }
@@ -136,11 +134,11 @@ trait FieldReaderConversions extends Serializable {
     val n = 5
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5))
     }
   }
@@ -150,12 +148,12 @@ trait FieldReaderConversions extends Serializable {
     val n = 6
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
-      val h6 = data.drop(5).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6))
     }
   }
@@ -165,13 +163,13 @@ trait FieldReaderConversions extends Serializable {
     val n = 7
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
-      val h6 = data.drop(5).head
-      val h7 = data.drop(6).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7))
     }
   }
@@ -181,14 +179,14 @@ trait FieldReaderConversions extends Serializable {
     val n = 8
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
-      val h6 = data.drop(5).head
-      val h7 = data.drop(6).head
-      val h8 = data.drop(7).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8))
     }
   }
@@ -198,15 +196,15 @@ trait FieldReaderConversions extends Serializable {
     val n = 9
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
-      val h6 = data.drop(5).head
-      val h7 = data.drop(6).head
-      val h8 = data.drop(7).head
-      val h9 = data.drop(8).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9))
     }
   }
@@ -216,16 +214,16 @@ trait FieldReaderConversions extends Serializable {
     val n = 10
 
     def tupleMap(data: HBaseData) = {
-      val h1 = data.head
-      val h2 = data.drop(1).head
-      val h3 = data.drop(2).head
-      val h4 = data.drop(3).head
-      val h5 = data.drop(4).head
-      val h6 = data.drop(5).head
-      val h7 = data.drop(6).head
-      val h8 = data.drop(7).head
-      val h9 = data.drop(8).head
-      val h10 = data.drop(9).head
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
       (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10))
     }
   }

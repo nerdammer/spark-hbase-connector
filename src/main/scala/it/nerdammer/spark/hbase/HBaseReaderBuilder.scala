@@ -57,12 +57,6 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       this.copy(salting = salting)
     }
 
-    private[hbase] def columnsWithFamily(): Iterable[(String, String)] = {
-      columns.map(c => {
-        if(c.contains(':')) (c.substring(0, c.indexOf(':')), c.substring(c.indexOf(':') + 1))
-        else (columnFamily.get, c)
-      })
-    }
 }
 
 
@@ -88,20 +82,9 @@ trait HBaseReaderBuilderConversions extends Serializable {
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
 
-    val columnNames =
-      if(builder.columns.nonEmpty) builder.columns
-      else if(mapper.defaultColumns.nonEmpty) mapper.defaultColumns
-      else throw new IllegalArgumentException("Columns to retrieve are undefined: use the reader builder or the FieldReader")
+    val columnNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
 
-    val columns =
-      if(builder.columnFamily.isEmpty) columnNames
-      else columnNames map (c => {
-        if(c.indexOf(':') >= 0) c
-        else builder.columnFamily.get + ':' + c
-      })
-
-    if(columns.exists(c => c.indexOf(':') < 0))
-      throw new IllegalArgumentException("You must specify the default column family or use the fully qualified name of the columns. Eg. 'cf1:col1'")
+    val columns = HBaseUtils.fullyQualifiedColumns(builder.columnFamily, columnNames)
 
     if(columns.nonEmpty) {
       hbaseConfig.set(TableInputFormat.SCAN_COLUMNS, columns.mkString(" "))
