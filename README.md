@@ -1,22 +1,53 @@
 # Spark-HBase Connector
 
+[![Build status](https://travis-ci.org/nerdammer/spark-hbase-connector.svg)](https://travis-ci.org/nerdammer/spark-hbase-connector)
+
 This library lets your Apache Spark application interact with Apache HBase using a simple and elegant API.
 
 If you want to read and write data to HBase, you don't need using the Hadoop API anymore, you can just use Spark.
 
 ## Including the library
 
-The spark-hbase-connector library is not yet available in Maven repository, so you need to build it from the source code.
+The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
-Check out this Github repo and execute the following command from the root folder:
+```
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.1"
+```
+
+The Maven style version of the dependency is:
+
+```xml
+<dependency>
+  <groupId>it.nerdammer.bigdata</groupId>
+  <artifactId>spark-hbase-connector_2.10</artifactId>
+  <version>0.9.1</version>
+</dependency>
+```
+
+Note that, the library depends on the following artifacts:
+
+```
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.3" % "test"
+
+libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+
+libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2"
+
+libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.8-hadoop2"
+
+libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.8-hadoop2"
+
+```
+
+The *HBase* libraries will be part of your *fat* jar if you don't override the dependencies in your pom/sbt.
+
+If you don't like sbt or Maven, you can also check out this Github repo and execute the following command from the root folder:
 
     sbt package
 
 SBT will create the library jar under `target/scala-2.10`.
 
-Check also if the current branch is passing all tests in Travis-CI before checking out (See the following icon).
-
-[![Build status](https://travis-ci.org/nerdammer/spark-hbase-connector.svg)](https://travis-ci.org/nerdammer/spark-hbase-connector)
+Check also if the current branch is passing all tests in Travis-CI before checking out (See "build" icon above).
 
 ## Writing to HBase (Basic)
 
