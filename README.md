@@ -31,15 +31,13 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.3" % "test"
 
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
 
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2"
+libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2" % "provided"
 
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.8-hadoop2"
+libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.8-hadoop2" % "provided"
 
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.8-hadoop2"
+libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.8-hadoop2" % "provided"
 
 ```
-
-The *HBase* libraries will be part of your *fat* jar if you don't override the dependencies in your pom/sbt.
 
 If you don't like sbt or Maven, you can also check out this Github repo and execute the following command from the root folder:
 
