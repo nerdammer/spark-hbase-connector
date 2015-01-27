@@ -20,7 +20,7 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       )
       (implicit mapper: FieldReader[R]) extends Serializable {
 
-    protected[hbase] def withRanges(startRow: Option[String], stopRow: Option[String], salting: Iterable[String]) = copy(startRow = startRow, stopRow = stopRow, salting = salting)
+    private[hbase] def withRanges(startRow: Option[String], stopRow: Option[String], salting: Iterable[String]) = copy(startRow = startRow, stopRow = stopRow, salting = salting)
 
     def select(columns: String*): HBaseReaderBuilder[R] = {
       require(this.columns.isEmpty, "Columns have already been set")

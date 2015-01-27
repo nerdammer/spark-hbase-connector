@@ -3,7 +3,7 @@ package it.nerdammer.spark.hbase
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.spark.SparkConf
 
-case class HBaseSparkConf private[hbase] (
+case class HBaseSparkConf (
   hbaseHost: String = HBaseSparkConf.DefaultHBaseHost,
   hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) {
 
