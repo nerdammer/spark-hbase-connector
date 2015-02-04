@@ -271,10 +271,11 @@ val read = sc.hbaseTable[MyData]("mytable")
 ```
 
 The converters above are low level and use directly the HBase API. Since this connector provides you with many predefined converters for
-simple and complex types you can use the new *FieldReaderProxy* and *FieldWriterProxy* API.
+simple and complex types, probably you would like to reuse them.
+The new *FieldReaderProxy* and *FieldWriterProxy* API has been created for this purpose.
 
-Create a new *FieldWriterProxy* by declaring the custom type and the type it reduces to.
-In this case, it is a tuple composed of three basic fields:
+You can create a new *FieldWriterProxy* by declaring a conversion from your custom type to a predefined type.
+In this case, the predefined type it is a tuple composed of three basic fields:
 
 ```scala
 implicit def myDataWriter: FieldWriter[MySimpleData] = new FieldWriterProxy[MySimpleData, (Int, Int, String)] {
@@ -285,7 +286,7 @@ implicit def myDataWriter: FieldWriter[MySimpleData] = new FieldWriterProxy[MySi
 }
 ```
 
-The corresponding *FieldRereaderProxy* converts back a tuple of three basic fields into objects of class *MySimpleData*:
+The corresponding *FieldReaderProxy* converts back a tuple of three basic fields into objects of class *MySimpleData*:
 
 ```scala
 implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int, Int, String), MySimpleData] {
@@ -297,4 +298,4 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
 ```
 
-Note that we have not used the HBase API in the latest converters.
+Note that we have not used the HBase API.
