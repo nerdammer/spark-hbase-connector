@@ -1,4 +1,4 @@
-package it.nerdammer.spark.hbase.integration
+package com.user.integration
 
 import java.util.UUID
 

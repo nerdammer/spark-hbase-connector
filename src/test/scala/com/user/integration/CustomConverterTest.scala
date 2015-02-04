@@ -1,10 +1,10 @@
-package it.nerdammer.spark.hbase.integration
+package com.user.integration
 
 import java.util.UUID
 
+import com.user.integration.CustomConverterTest.MyData
 import it.nerdammer.spark.hbase._
 import it.nerdammer.spark.hbase.conversion.{FieldReader, FieldWriter}
-import it.nerdammer.spark.hbase.integration.CustomConverterTest.MyData
 import org.apache.hadoop.hbase.util.Bytes
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
@@ -31,6 +31,7 @@ class CustomConverterTest extends FlatSpec with Matchers with BeforeAndAfterAll 
 
     val read = sc.hbaseTable[MyData](tables(0))
       .inColumnFamily(columnFamilies(0))
+
 
     read.filter(m => m.prg!=m.id).count() should be (0)
     read.filter(m => m.prg%2==0).count() should be (50)

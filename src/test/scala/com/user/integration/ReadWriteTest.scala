@@ -1,14 +1,9 @@
-package it.nerdammer.spark.hbase.integration
-
+package com.user.integration
 
 import java.util.UUID
 
-import it.nerdammer.spark.hbase.HBaseSparkConf
-import org.apache.hadoop.hbase.{HColumnDescriptor, TableName, HTableDescriptor}
-import org.apache.hadoop.hbase.client.HBaseAdmin
-import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{BeforeAndAfterAll, Matchers, FlatSpec}
 import it.nerdammer.spark.hbase._
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 

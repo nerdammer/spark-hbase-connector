@@ -1,11 +1,8 @@
-package it.nerdammer.spark.hbase.integration
+package com.user.integration
 
 import java.util.UUID
 
-import it.nerdammer.spark.hbase.{HBaseSparkConf, _}
-import org.apache.hadoop.hbase.client.HBaseAdmin
-import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
-import org.apache.spark.{SparkConf, SparkContext}
+import it.nerdammer.spark.hbase._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class TypeConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll  {

@@ -1,8 +1,8 @@
-package it.nerdammer.spark.hbase.integration
+package com.user.integration
 
 import it.nerdammer.spark.hbase.HBaseSparkConf
-import org.apache.hadoop.hbase.{HColumnDescriptor, TableName, HTableDescriptor}
 import org.apache.hadoop.hbase.client.HBaseAdmin
+import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.spark.{SparkConf, SparkContext}
 
 object IntegrationUtils extends Serializable {

@@ -7,6 +7,17 @@ trait FieldWriter[T] extends FieldMapper {
   def map(data: T): HBaseData
 }
 
+/**
+ * Utility class used to simplify the creation of custom mappers.
+ * FieldWriterProxy's can reuse predefined FieldWriter's.
+ */
+abstract class FieldWriterProxy[T, P](implicit writer: FieldWriter[P]) extends FieldWriter[T] {
+
+  override def map(data: T): HBaseData = writer.map(convert(data))
+
+  def convert(data: T): P
+}
+
 trait SingleColumnFieldWriter[T] extends FieldWriter[T] {
   override def map(data: T): HBaseData = Seq(mapColumn(data))
 

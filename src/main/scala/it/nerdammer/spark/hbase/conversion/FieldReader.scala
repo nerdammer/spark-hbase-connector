@@ -6,6 +6,17 @@ trait FieldReader[T] extends FieldMapper {
   def map(data: HBaseData): T
 }
 
+/**
+ * Utility class used to simplify the creation of custom mappers.
+ * FieldReaderProxy's can reuse predefined FieldReader's.
+ */
+abstract class FieldReaderProxy[P,T](implicit reader: FieldReader[P]) extends FieldReader[T] {
+
+  override def map(data: HBaseData): T = convert(reader.map(data))
+
+  def convert(data: P): T
+}
+
 trait SingleColumnFieldReader[T] extends FieldReader[T] {
 
   def map(data: HBaseData): T =
