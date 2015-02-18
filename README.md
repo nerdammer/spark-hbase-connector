@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.2"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.4"
 ```
 
 The Maven style version of the dependency is:
@@ -20,16 +20,16 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>0.9.2</version>
+  <version>0.9.4</version>
 </dependency>
 ```
 
 Note that, the library depends on the following artifacts:
 
 ```
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.3" % "test"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
-libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
 
 libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2" % "provided"
 
@@ -83,7 +83,7 @@ Reading from HBase is easier. Remember to import the implicit conversions:
 import it.nerdammer.spark.hbase._
 ```
 
-Supposing you want to read the sample data you have written in previous example, you just need to write:
+If you want to read the data written in the previous example, you just need to write:
 
 ```scala
 val hBaseRDD = sc.hbaseTable[(String, Int, String)]("mytable")
@@ -91,10 +91,10 @@ val hBaseRDD = sc.hbaseTable[(String, Int, String)]("mytable")
     .inColumnFamily("mycf")
 ```
 
-Now *hBaseRDD* contains all data found in the table. Each object in the RDD is a tuple conaining (in order) the *row id*,
+Now *hBaseRDD* contains all the data found in the table. Each object in the RDD is a tuple containing (in order) the *row id*,
 the corresponding value of *column1* (Int) and *column2* (String).
 
-If you don't want the *row id* and want only to see the columns, just remove the first element from the tuple specs:
+If you don't want the *row id* but, you only want to see the columns, just remove the first element from the tuple specs:
 
 ```scala
 val hBaseRDD = sc.hbaseTable[(Int, String)]("mytable")
@@ -102,12 +102,12 @@ val hBaseRDD = sc.hbaseTable[(Int, String)]("mytable")
     .inColumnFamily("mycf")
 ```
 
-This way, only the columns that you have chosen will be returned.
+This way, only the columns that you have chosen will be selected.
 
 ## Other Topics
 
 ### Filtering
-It is possible to filter the results by prefixes of the row key. Filtering also supports additional salting prefixes
+It is possible to filter the results by prefixes of row keys. Filtering also supports additional salting prefixes
 (see the [salting](#salting) section).
 
 ```scala
@@ -214,6 +214,47 @@ val rdd = sc.hbaseTable[String](table)
       .withSalting((0 to 9).map(s => s.toString))
 ```
 
+### Custom Mapping with Case Classes
+
+Custom mapping can be used in place of the default tuple-mapping technique. Just define a case class for your type:
+
+```scala
+case class MyData(id: Int, prg: Int, name: String)
+```
+
+and define an object that contains *implicit* writer and reader for your type
+
+```scala
+implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
+    override def map(data: MyData): HBaseData =
+      Seq(
+        Some(Bytes.toBytes(data.id)),
+        Some(Bytes.toBytes(data.prg)),
+        Some(Bytes.toBytes(data.name))
+      )
+
+    override def columns = Seq("prg", "name")
+}
+```
+
+don't forget to override the *columns* method!!!
+
+And you can define an *implicit* reader:
+
+```scala
+implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
+    override def map(data: HBaseData): MyData = MyData(
+      id = Bytes.toInt(data.head.get),
+      prg = Bytes.toInt(data.drop(1).head.get),
+      name = Bytes.toString(data.drop(2).head.get)
+    )
+
+    override def columns = Seq("prg", "name")
+}
+```
+
+
+
 ### Custom Mapping
 
 Custom mapping can be used in place of the default tuple-mapping algorithm. Just define one custom class:
@@ -274,6 +315,8 @@ The converters above are low level and use directly the HBase API. Since this co
 simple and complex types, probably you would like to reuse them.
 The new *FieldReaderProxy* and *FieldWriterProxy* API has been created for this purpose.
 
+### Convert using FieldWriterProxy
+
 You can create a new *FieldWriterProxy* by declaring a conversion from your custom type to a predefined type.
 In this case, the predefined type it is a tuple composed of three basic fields:
 
@@ -298,4 +341,4 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
 ```
 
-Note that we have not used the HBase API.
+Note that we have not used the HBase API. Actually, *FieldWriterProxy* can read and write tuples up to 10 fields.
