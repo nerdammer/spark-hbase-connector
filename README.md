@@ -20,7 +20,7 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>0.9.2</version>
+  <version>0.9.4</version>
 </dependency>
 ```
 
