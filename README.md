@@ -27,9 +27,9 @@ The Maven style version of the dependency is:
 Note that, the library depends on the following artifacts:
 
 ```
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.3" % "test"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
-libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
 
 libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.8-hadoop2" % "provided"
 
