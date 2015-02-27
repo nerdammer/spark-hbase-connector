@@ -237,7 +237,7 @@ implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
 }
 ```
 
-don't forget to override the *columns* method!!!
+don't forget to override the *columns* method!
 
 And you can define an *implicit* reader:
 
@@ -341,4 +341,4 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
 ```
 
-Note that we have not used the HBase API. Actually, *FieldWriterProxy* can read and write tuples up to 10 fields.
+Note that we have not used the HBase API. Currently, *FieldWriterProxy* can read and write tuples up to 15 fields (including the row id).

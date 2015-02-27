@@ -103,4 +103,24 @@ trait FieldWriterConversions extends Serializable {
     override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10)
   }
 
+  implicit def tupleWriter11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](implicit c1: FieldWriter[T1], c2: FieldWriter[T2], c3: FieldWriter[T3], c4: FieldWriter[T4], c5: FieldWriter[T5], c6: FieldWriter[T6], c7: FieldWriter[T7], c8: FieldWriter[T8], c9: FieldWriter[T9], c10: FieldWriter[T10], c11: FieldWriter[T11]): FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] = new FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] {
+    override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10) ++ c11.map(data._11)
+  }
+
+  implicit def tupleWriter12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](implicit c1: FieldWriter[T1], c2: FieldWriter[T2], c3: FieldWriter[T3], c4: FieldWriter[T4], c5: FieldWriter[T5], c6: FieldWriter[T6], c7: FieldWriter[T7], c8: FieldWriter[T8], c9: FieldWriter[T9], c10: FieldWriter[T10], c11: FieldWriter[T11], c12: FieldWriter[T12]): FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] = new FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] {
+    override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10) ++ c11.map(data._11) ++ c12.map(data._12)
+  }
+
+  implicit def tupleWriter13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](implicit c1: FieldWriter[T1], c2: FieldWriter[T2], c3: FieldWriter[T3], c4: FieldWriter[T4], c5: FieldWriter[T5], c6: FieldWriter[T6], c7: FieldWriter[T7], c8: FieldWriter[T8], c9: FieldWriter[T9], c10: FieldWriter[T10], c11: FieldWriter[T11], c12: FieldWriter[T12], c13: FieldWriter[T13]): FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] = new FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] {
+    override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10) ++ c11.map(data._11) ++ c12.map(data._12) ++ c13.map(data._13)
+  }
+
+  implicit def tupleWriter14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](implicit c1: FieldWriter[T1], c2: FieldWriter[T2], c3: FieldWriter[T3], c4: FieldWriter[T4], c5: FieldWriter[T5], c6: FieldWriter[T6], c7: FieldWriter[T7], c8: FieldWriter[T8], c9: FieldWriter[T9], c10: FieldWriter[T10], c11: FieldWriter[T11], c12: FieldWriter[T12], c13: FieldWriter[T13], c14: FieldWriter[T14]): FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] = new FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] {
+    override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10) ++ c11.map(data._11) ++ c12.map(data._12) ++ c13.map(data._13) ++ c14.map(data._14)
+  }
+
+  implicit def tupleWriter15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](implicit c1: FieldWriter[T1], c2: FieldWriter[T2], c3: FieldWriter[T3], c4: FieldWriter[T4], c5: FieldWriter[T5], c6: FieldWriter[T6], c7: FieldWriter[T7], c8: FieldWriter[T8], c9: FieldWriter[T9], c10: FieldWriter[T10], c11: FieldWriter[T11], c12: FieldWriter[T12], c13: FieldWriter[T13], c14: FieldWriter[T14], c15: FieldWriter[T15]): FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)] = new FieldWriter[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)] {
+    override def map(data: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)): HBaseData = c1.map(data._1) ++ c2.map(data._2) ++ c3.map(data._3) ++ c4.map(data._4) ++ c5.map(data._5) ++ c6.map(data._6) ++ c7.map(data._7) ++ c8.map(data._8) ++ c9.map(data._9) ++ c10.map(data._10) ++ c11.map(data._11) ++ c12.map(data._12) ++ c13.map(data._13) ++ c14.map(data._14) ++ c15.map(data._15)
+  }
+
 }

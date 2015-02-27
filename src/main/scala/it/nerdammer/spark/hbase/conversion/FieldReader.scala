@@ -239,6 +239,116 @@ trait FieldReaderConversions extends Serializable {
     }
   }
 
+  implicit def tuple11Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10], m11: FieldReader[T11]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] {
+
+    val n = 11
+
+    def tupleMap(data: HBaseData) = {
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
+      val h11 = data.drop(10).take(1)
+      (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10), m11.map(h11))
+    }
+  }
+
+  implicit def tuple12Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10], m11: FieldReader[T11], m12: FieldReader[T12]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] {
+
+    val n = 12
+
+    def tupleMap(data: HBaseData) = {
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
+      val h11 = data.drop(10).take(1)
+      val h12 = data.drop(11).take(1)
+      (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10), m11.map(h11), m12.map(h12))
+    }
+  }
+
+  implicit def tuple13Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10], m11: FieldReader[T11], m12: FieldReader[T12], m13: FieldReader[T13]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] {
+
+    val n = 13
+
+    def tupleMap(data: HBaseData) = {
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
+      val h11 = data.drop(10).take(1)
+      val h12 = data.drop(11).take(1)
+      val h13 = data.drop(12).take(1)
+      (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10), m11.map(h11), m12.map(h12), m13.map(h13))
+    }
+  }
+
+  implicit def tuple14Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10], m11: FieldReader[T11], m12: FieldReader[T12], m13: FieldReader[T13], m14: FieldReader[T14]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] {
+
+    val n = 14
+
+    def tupleMap(data: HBaseData) = {
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
+      val h11 = data.drop(10).take(1)
+      val h12 = data.drop(11).take(1)
+      val h13 = data.drop(12).take(1)
+      val h14 = data.drop(13).take(1)
+      (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10), m11.map(h11), m12.map(h12), m13.map(h13), m14.map(h14))
+    }
+  }
+
+  implicit def tuple15Reader[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](implicit m1: FieldReader[T1], m2: FieldReader[T2], m3: FieldReader[T3], m4: FieldReader[T4], m5: FieldReader[T5], m6: FieldReader[T6], m7: FieldReader[T7], m8: FieldReader[T8], m9: FieldReader[T9], m10: FieldReader[T10], m11: FieldReader[T11], m12: FieldReader[T12], m13: FieldReader[T13], m14: FieldReader[T14], m15: FieldReader[T15]): FieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)] = new TupleFieldReader[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15)] {
+
+    val n = 15
+
+    def tupleMap(data: HBaseData) = {
+      val h1 = data.take(1)
+      val h2 = data.drop(1).take(1)
+      val h3 = data.drop(2).take(1)
+      val h4 = data.drop(3).take(1)
+      val h5 = data.drop(4).take(1)
+      val h6 = data.drop(5).take(1)
+      val h7 = data.drop(6).take(1)
+      val h8 = data.drop(7).take(1)
+      val h9 = data.drop(8).take(1)
+      val h10 = data.drop(9).take(1)
+      val h11 = data.drop(10).take(1)
+      val h12 = data.drop(11).take(1)
+      val h13 = data.drop(12).take(1)
+      val h14 = data.drop(13).take(1)
+      val h15 = data.drop(14).take(1)
+      (m1.map(h1), m2.map(h2), m3.map(h3), m4.map(h4), m5.map(h5), m6.map(h6), m7.map(h7), m8.map(h8), m9.map(h9), m10.map(h10), m11.map(h11), m12.map(h12), m13.map(h13), m14.map(h14), m15.map(h15))
+    }
+  }
+
 }
 
 
