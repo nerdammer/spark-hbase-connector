@@ -1,6 +1,6 @@
 # Spark-HBase Connector
 
-[![Build status](https://travis-ci.org/nerdammer/spark-hbase-connector.svg)](https://travis-ci.org/nerdammer/spark-hbase-connector)
+[![Build status](https://travis-ci.org/nerdammer/spark-hbase-connector.svg?branch=master)](https://travis-ci.org/nerdammer/spark-hbase-connector)
 
 This library lets your Apache Spark application interact with Apache HBase using a simple and elegant API.
 
