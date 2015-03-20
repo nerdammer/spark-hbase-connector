@@ -8,11 +8,13 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext._
+import org.apache.spark.streaming.dstream.DStream
 
 import scala.reflect.ClassTag
 
 case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
-      rdd: RDD[R],
+      rdd: Option[RDD[R]],
+      dstream: Option[DStream[R]],
       table: String,
       columnFamily: Option[String] = None,
       columns: Iterable[String] = Seq.empty,
@@ -20,6 +22,8 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       )(implicit mapper: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
+    if(rdd.isEmpty && dstream.isEmpty || rdd.nonEmpty && dstream.nonEmpty)
+      throw new IllegalArgumentException("You must provide one of rdd or dstream")
 
     def toColumns(columns: String*): HBaseWriterBuilder[R] = {
       require(this.columns.isEmpty, "Columns have already been set")
@@ -44,17 +48,24 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
 
 }
 
-class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
+class HBaseWriterBuildable[R: ClassTag](rdd: Option[RDD[R]], dstream: Option[DStream[R]])(implicit mapper: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
 
-  def toHBaseTable(table: String) = new HBaseWriterBuilder[R](rdd, table)
+  def toHBaseTable(table: String) = new HBaseWriterBuilder[R](rdd, dstream, table)
 
 }
 
 class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
 
   def save(): Unit = {
+    if(builder.rdd.nonEmpty)
+      save(builder, builder.rdd.get)
+    else
+      builder.dstream.get.foreachRDD(rdd => save(builder, rdd))
+  }
 
-    val conf = HBaseSparkConf.fromSparkConf(builder.rdd.sparkContext.getConf).createHadoopBaseConfig()
+  private def save(builder: HBaseWriterBuilder[R], rdd: RDD[R]): Unit = {
+
+    val conf = HBaseSparkConf.fromSparkConf(rdd.sparkContext.getConf).createHadoopBaseConfig()
     conf.set(TableOutputFormat.OUTPUT_TABLE, builder.table)
 
     val job = Job.getInstance(conf)
@@ -64,7 +75,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
       if(builder.salting.isEmpty) None
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
-    val transRDD = builder.rdd.map(r => {
+    val transRDD = rdd.map(r => {
       val convertedData: Iterable[Option[Array[Byte]]] = mapper.map(r)
       if(convertedData.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
@@ -105,7 +116,9 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
 
 trait HBaseWriterBuilderConversions extends Serializable {
 
-  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](rdd)
+  implicit def rddToHBaseBuilder[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](Some(rdd), None)
+
+  implicit def dStreamToHBaseBuilder[R: ClassTag](dstream: DStream[R])(implicit mapper: FieldWriter[R]): HBaseWriterBuildable[R] = new HBaseWriterBuildable[R](None, Some(dstream))
 
   implicit def writerBuilderToWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R]): HBaseWriter[R] = new HBaseWriter[R](builder)
 

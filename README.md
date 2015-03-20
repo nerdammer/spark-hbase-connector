@@ -31,6 +31,8 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
 
+libraryDependencies += "org.apache.spark" % "spark-streaming_2.10" % "1.2.1" % "provided",
+
 libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.10.1-hadoop2" % "provided"
 
 libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.10.1-hadoop2" % "provided"
