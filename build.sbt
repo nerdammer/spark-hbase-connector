@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark" % "spark-streaming_2.10" % "1.3.0" % "provided",
   "org.apache.hbase" % "hbase-common" % "1.0.0" % "provided",
   "org.apache.hbase" % "hbase-client" % "1.0.0" % "provided",
-  "org.apache.hbase" % "hbase-server" % "1.0.0" % "provided"
+  "org.apache.hbase" % "hbase-server" % "1.0.0" % "provided",
+  "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 )
 
 publishMavenStyle := true
