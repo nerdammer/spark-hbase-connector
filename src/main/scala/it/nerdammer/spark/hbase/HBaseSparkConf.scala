@@ -5,7 +5,7 @@ import org.apache.spark.SparkConf
 
 case class HBaseSparkConf (
   hbaseHost: String = HBaseSparkConf.DefaultHBaseHost,
-  hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) {
+  hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) extends Serializable {
 
   def createHadoopBaseConfig() = {
     val conf = HBaseConfiguration.create
@@ -18,7 +18,7 @@ case class HBaseSparkConf (
   }
 }
 
-object HBaseSparkConf {
+object HBaseSparkConf extends Serializable {
   val DefaultHBaseHost = "localhost"
   val DefaultHBaseRootDir = "/hbase"
 

@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 
 case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       rdd: Option[RDD[R]],
-      dstream: Option[DStream[R]],
+      @transient dstream: Option[DStream[R]],
       table: String,
       columnFamily: Option[String] = None,
       columns: Iterable[String] = Seq.empty,
@@ -22,8 +22,8 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       )(implicit mapper: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
-    if(rdd.isEmpty && dstream.isEmpty || rdd.nonEmpty && dstream.nonEmpty)
-      throw new IllegalArgumentException("You must provide one of rdd or dstream")
+    if(rdd.nonEmpty && dstream.nonEmpty)
+      throw new IllegalArgumentException("You must provide just one of rdd or dstream")
 
     def toColumns(columns: String*): HBaseWriterBuilder[R] = {
       require(this.columns.isEmpty, "Columns have already been set")
@@ -57,13 +57,19 @@ class HBaseWriterBuildable[R: ClassTag](rdd: Option[RDD[R]], dstream: Option[DSt
 class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
 
   def save(): Unit = {
+    val builderTemplate = builder.copy(rdd=None, dstream = None)
+
     if(builder.rdd.nonEmpty)
-      save(builder, builder.rdd.get)
-    else
-      builder.dstream.get.foreachRDD(rdd => save(builder, rdd))
+      saveRDD(builderTemplate, builder.rdd.get)
+    else {
+      // Avoid serialization issues by not including DStreams in closure
+      builder.dstream.get.foreachRDD(rdd => {
+        saveRDD(builderTemplate, rdd)
+      })
+    }
   }
 
-  private def save(builder: HBaseWriterBuilder[R], rdd: RDD[R]): Unit = {
+  def saveRDD(builder: HBaseWriterBuilder[R], rdd: RDD[R]): Unit = {
 
     val conf = HBaseSparkConf.fromSparkConf(rdd.sparkContext.getConf).createHadoopBaseConfig()
     conf.set(TableOutputFormat.OUTPUT_TABLE, builder.table)
@@ -76,7 +82,9 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = rdd.map(r => {
+
       val convertedData: Iterable[Option[Array[Byte]]] = mapper.map(r)
+
       if(convertedData.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }

@@ -27,30 +27,33 @@ class StreamingTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
 
     val rddQueue = new mutable.SynchronizedQueue[RDD[Int]]()
 
+    val table = tables(0)
+    val cf = columnFamilies(0)
+
     val inputStream = ssc.queueStream(rddQueue)
     val mappedStream = inputStream.map(x => (x, x))
     mappedStream
-      .toHBaseTable(tables(0))
-      .inColumnFamily(columnFamilies(0))
+      .toHBaseTable(table)
+      .inColumnFamily(cf)
       .toColumns("col1")
       .save()
 
     ssc.start()
 
-    for (i <- 0 to 5) {
+    (0 to 5).map(i => {
       rddQueue += ssc.sparkContext.makeRDD(10*i until 10*i+10, 10)
       Thread.sleep(1000)
-    }
+    })
 
     ssc.stop(false)
 
-    val sum = sc.hbaseTable[(Int)](tables(0))
+    val sum = sc.hbaseTable[(Int)](table)
       .select("col1")
-      .inColumnFamily(columnFamilies(0))
+      .inColumnFamily(cf)
       .reduce(_ + _)
 
 
-    sum should be {60*61/2}
+    sum should be {59*60/2}
 
   }
 

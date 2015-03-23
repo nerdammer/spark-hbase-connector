@@ -7,15 +7,17 @@ version := "0.9.3-SNAPSHOT"
 scalaVersion := "2.10.4"
 
 
-libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test",
-  "org.apache.spark" % "spark-core_2.10" % "1.3.0" % "provided",
-  "org.apache.spark" % "spark-streaming_2.10" % "1.3.0" % "provided",
-  "org.apache.hbase" % "hbase-common" % "1.0.0" % "provided",
-  "org.apache.hbase" % "hbase-client" % "1.0.0" % "provided",
-  "org.apache.hbase" % "hbase-server" % "1.0.0" % "provided",
-  "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
-)
+libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
+
+libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
+
+libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.1" % "provided"
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" % "provided"
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" % "provided"
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" % "provided"
 
 publishMavenStyle := true
 
