@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.3"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.4"
 ```
 
 The Maven style version of the dependency is:
@@ -20,7 +20,7 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>0.9.3</version>
+  <version>0.9.4</version>
 </dependency>
 ```
 
@@ -183,6 +183,20 @@ val sparkConf = new SparkConf()
 sparkConf.set("spark.hbase.host", "thehost")
 ...
 val sc = new SparkContext(sparkConf)
+```
+
+### Usage in Spark Streaming
+The connector can be used in Spark Streaming applications with the same API.
+Currently, *DStreams* can only be written to HBase.
+
+```scala
+// stream is a DStream[(Int, Int)]
+
+stream
+  .toHBaseTable("table")
+  .inColumnFamily("cf")
+  .toColumns("col1")
+  .save()
 ```
 
 ## Advanced
