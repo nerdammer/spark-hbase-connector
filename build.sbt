@@ -2,7 +2,7 @@ organization := "it.nerdammer.bigdata"
 
 name := "spark-hbase-connector"
 
-version := "0.9.5-SNAPSHOT"
+version := "0.9.5"
 
 scalaVersion := "2.10.4"
 
@@ -31,9 +31,8 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".githubcredentials")
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 
-/***
-  spIncludeMaven := true
-*/
+spIncludeMaven := false
+
 
 
 
