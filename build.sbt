@@ -2,7 +2,7 @@ organization := "it.nerdammer.bigdata"
 
 name := "spark-hbase-connector"
 
-version := "0.9.4-SNAPSHOT"
+version := "0.9.4"
 
 scalaVersion := "2.10.4"
 
