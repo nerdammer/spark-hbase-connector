@@ -31,7 +31,7 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".githubcredentials")
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 
-spIncludeMaven := false
+spIncludeMaven := true
 
 
 
