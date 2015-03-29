@@ -9,7 +9,7 @@ object IntegrationUtils extends Serializable {
 
   @transient lazy val sparkContext: SparkContext = {
     val sparkConf = new SparkConf()
-    sparkConf.set("spark.master", "localhost")
+    sparkConf.set("spark.master", "local")
     sparkConf.set("spark.driver.allowMultipleContexts", "true")
     sparkConf.setAppName("test")
     new SparkContext(sparkConf)
