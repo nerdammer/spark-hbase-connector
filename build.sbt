@@ -2,22 +2,40 @@ organization := "it.nerdammer.bigdata"
 
 name := "spark-hbase-connector"
 
-version := "0.9.4-SNAPSHOT"
+version := "0.9.5-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
 
 libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
-libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
+libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
 
-libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.1" % "provided"
+libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "provided"
 
 libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" % "provided"
 
 libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" % "provided"
 
 libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" % "provided"
+
+
+
+spName := "nerdammer/spark-hbase-connector"
+
+sparkVersion := "1.2.0"
+
+sparkComponents += "streaming"
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".githubcredentials")
+
+licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
+
+/***
+  spIncludeMaven := true
+*/
+
+
 
 publishMavenStyle := true
 
