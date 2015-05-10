@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.4"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.0"
 ```
 
 The Maven style version of the dependency is:
@@ -20,25 +20,8 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>0.9.4</version>
+  <version>1.0.0</version>
 </dependency>
-```
-
-Note that, the library depends on the following artifacts:
-
-```
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
-
-libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.1" % "provided"
-
-libraryDependencies += "org.apache.spark" % "spark-streaming_2.10" % "1.2.1" % "provided",
-
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.10.1-hadoop2" % "provided"
-
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.10.1-hadoop2" % "provided"
-
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.10.1-hadoop2" % "provided"
-
 ```
 
 If you don't like sbt or Maven, you can also check out this Github repo and execute the following command from the root folder:
@@ -46,6 +29,24 @@ If you don't like sbt or Maven, you can also check out this Github repo and exec
     sbt package
 
 SBT will create the library jar under `target/scala-2.10`.
+
+Note that the library depends on the following artifacts:
+
+```
+libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
+
+libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "test"
+
+```
 
 Check also if the current branch is passing all tests in Travis-CI before checking out (See "build" icon above).
 
@@ -187,16 +188,16 @@ val sc = new SparkContext(sparkConf)
 
 ### Usage in Spark Streaming
 The connector can be used in Spark Streaming applications with the same API.
-Currently, *DStreams* can only be written to HBase.
 
 ```scala
 // stream is a DStream[(Int, Int)]
 
-stream
-  .toHBaseTable("table")
-  .inColumnFamily("cf")
-  .toColumns("col1")
-  .save()
+stream.foreachRDD(rdd =>
+    rdd.toHBaseTable("table")
+      .inColumnFamily("cf")
+      .toColumns("col1")
+      .save()
+    )
 ```
 
 ## Advanced
@@ -253,7 +254,7 @@ implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
 }
 ```
 
-don't forget to override the *columns* method!
+Do not forget to override the *columns* method.
 
 And you can define an *implicit* reader:
  
@@ -263,47 +264,6 @@ implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
       id = Bytes.toInt(data.head.get),
       prg = Bytes.toInt(data.drop(1).head.get),
       name = Bytes.toString(data.drop(2).head.get)
-    )
-
-    override def columns = Seq("prg", "name")
-}
-```
-
-
-
-### Custom Mapping
-
-Custom mapping can be used in place of the default tuple-mapping algorithm. Just define one custom class:
-
-```scala
-class MyData(val id: Int, val prg: Int, val name: String) extends Serializable {
-
-}
-```
-
-Then you can define an *implicit* writer for that kind of objects:
-
-```scala
-implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
-    override def map(data: MyData): HBaseData =
-      Seq(
-        Some(Bytes.toBytes(data.id)),
-        Some(Bytes.toBytes(data.prg)),
-        Some(Bytes.toBytes(data.name))
-      )
-
-    override def columns = Seq("prg", "name")
-}
-```
-
-And you can define an *implicit* reader:
-
-```scala
-implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
-    override def map(data: HBaseData): MyData = new MyData(
-      Bytes.toInt(data.head.get),
-      Bytes.toInt(data.drop(1).head.get),
-      Bytes.toString(data.drop(2).head.get)
     )
 
     override def columns = Seq("prg", "name")
@@ -331,12 +291,14 @@ The converters above are low level and use directly the HBase API. Since this co
 simple and complex types, probably you would like to reuse them.
 The new *FieldReaderProxy* and *FieldWriterProxy* API has been created for this purpose.
 
-### Convert using FieldWriterProxy
+### High-level converters using FieldWriterProxy
 
 You can create a new *FieldWriterProxy* by declaring a conversion from your custom type to a predefined type.
 In this case, the predefined type it is a tuple composed of three basic fields:
 
 ```scala
+// MySimpleData is a case class
+
 implicit def myDataWriter: FieldWriter[MySimpleData] = new FieldWriterProxy[MySimpleData, (Int, Int, String)] {
 
   override def convert(data: MySimpleData) = (data.id, data.prg, data.name) // the first element is the row id
@@ -352,7 +314,7 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
   override def columns = Seq("prg", "name")
 
-  override def convert(data: (Int, Int, String)) = new MySimpleData(data._1, data._2, data._3)
+  override def convert(data: (Int, Int, String)) = MySimpleData(data._1, data._2, data._3)
 }
 
 ```

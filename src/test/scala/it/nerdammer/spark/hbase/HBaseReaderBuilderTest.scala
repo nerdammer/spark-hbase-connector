@@ -1,6 +1,5 @@
 package it.nerdammer.spark.hbase
 
-import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{FlatSpec, Matchers}
 
 class HBaseReaderBuilderTest extends FlatSpec with Matchers {

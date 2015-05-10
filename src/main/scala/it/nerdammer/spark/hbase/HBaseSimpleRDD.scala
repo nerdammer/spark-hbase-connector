@@ -10,8 +10,8 @@ import org.apache.spark.{Partition, TaskContext}
 
 import scala.reflect.ClassTag
 
-class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result], builder: HBaseReaderBuilder[R])
-                       (implicit mapper: FieldReader[R]) extends RDD[R](hadoopHBase) {
+class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritable, Result], builder: HBaseReaderBuilder[R], saltingLength: Int = 0)
+                       (implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]) extends RDD[R](hadoopHBase) {
 
   override def getPartitions: Array[Partition] = firstParent[(ImmutableBytesWritable, Result)].partitions
 
@@ -32,6 +32,6 @@ class HBaseSimpleRDD[R: ClassTag](hadoopHBase: NewHadoopRDD[ImmutableBytesWritab
       .map(t => if(row.containsColumn(t._1, t._2)) Some(CellUtil.cloneValue(row.getColumnLatestCell(t._1, t._2)).array) else None)
       .toList
 
-    mapper.map(Some(key.get) :: columns)
+    mapper.map(Some(key.get.drop(saltingLength)) :: columns)
   }
 }

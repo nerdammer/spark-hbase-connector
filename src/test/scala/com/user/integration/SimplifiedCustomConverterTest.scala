@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.user.integration.SimplifiedCustomConverterTest.MySimpleData
 import it.nerdammer.spark.hbase._
-import it.nerdammer.spark.hbase.conversion.{FieldReaderProxy, FieldWriterProxy, FieldReader, FieldWriter}
+import it.nerdammer.spark.hbase.conversion.{FieldReader, FieldReaderProxy, FieldWriter, FieldWriterProxy}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 class SimplifiedCustomConverterTest extends FlatSpec with Matchers with BeforeAndAfterAll  {

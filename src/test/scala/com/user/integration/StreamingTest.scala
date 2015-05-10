@@ -2,10 +2,9 @@ package com.user.integration
 
 import java.util.UUID
 
-
+import it.nerdammer.spark.hbase._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import it.nerdammer.spark.hbase._
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.mutable
@@ -33,10 +32,12 @@ class StreamingTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val inputStream = ssc.queueStream(rddQueue)
     val mappedStream = inputStream.map(x => (x, x))
     mappedStream
-      .toHBaseTable(table)
-      .inColumnFamily(cf)
-      .toColumns("col1")
-      .save()
+      .foreachRDD(rdd => rdd.toHBaseTable(table)
+          .inColumnFamily(cf)
+          .toColumns("col1")
+          .save()
+      )
+
 
     ssc.start()
 
@@ -46,7 +47,7 @@ class StreamingTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     })
 
 
-    Thread.sleep(5000)
+    Thread.sleep(20000)
 
     ssc.stop(false)
 

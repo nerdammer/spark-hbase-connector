@@ -11,14 +11,14 @@ import scala.reflect.ClassTag
 
 case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       @transient sc: SparkContext,
-      table: String,
-      columnFamily: Option[String] = None,
-      columns: Iterable[String] = Seq.empty,
-      startRow: Option[String] = None,
-      stopRow: Option[String] = None,
-      salting: Iterable[String] = Seq.empty
+      private[hbase] val table: String,
+      private[hbase] val columnFamily: Option[String] = None,
+      private[hbase] val columns: Iterable[String] = Seq.empty,
+      private[hbase] val startRow: Option[String] = None,
+      private[hbase] val stopRow: Option[String] = None,
+      private[hbase] val salting: Iterable[String] = Seq.empty
       )
-      (implicit mapper: FieldReader[R]) extends Serializable {
+      (implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]) extends Serializable {
 
     private[hbase] def withRanges(startRow: Option[String], stopRow: Option[String], salting: Iterable[String]) = copy(startRow = startRow, stopRow = stopRow, salting = salting)
 
@@ -62,22 +62,24 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
 
 trait HBaseReaderBuilderConversions extends Serializable {
 
-  implicit def toHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldReader[R]): RDD[R] = {
+  implicit def toHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]): RDD[R] = {
     if(builder.salting.isEmpty) {
       toSimpleHBaseRDD(builder)
     } else {
-      require(builder.startRow.nonEmpty || builder.stopRow.nonEmpty, "Salting can be used only together with startRow and/or stopRow")
+      //require(builder.startRow.nonEmpty || builder.stopRow.nonEmpty, "Salting can be used only together with startRow and/or stopRow")
+      // Removed as salting can also be used to remove leading bytes from row keys
+
+      val saltingLength = saltingProvider.getSaltingProvider(builder.salting).length
 
       val builders = getSaltedBuilders(builder)
 
-
-      val rddSeq = builders.map(bui => toSimpleHBaseRDD(bui).asInstanceOf[RDD[R]]).toSeq
+      val rddSeq = builders.map(bui => toSimpleHBaseRDD(bui, saltingLength).asInstanceOf[RDD[R]]).toSeq
       val sc = rddSeq.head.sparkContext
       new HBaseSaltedRDD[R](sc, rddSeq)
     }
   }
 
-  def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R])(implicit mapper: FieldReader[R]): HBaseSimpleRDD[R] = {
+  def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R], saltingLength: Int = 0)(implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]): HBaseSimpleRDD[R] = {
     val hbaseConfig = HBaseSparkConf.fromSparkConf(builder.sc.getConf).createHadoopBaseConfig()
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
@@ -102,7 +104,7 @@ trait HBaseReaderBuilderConversions extends Serializable {
       classOf[ImmutableBytesWritable], classOf[Result])
       .asInstanceOf[NewHadoopRDD[ImmutableBytesWritable, Result]]
 
-    new HBaseSimpleRDD[R](rdd, builder)
+    new HBaseSimpleRDD[R](rdd, builder, saltingLength)
   }
 
   def getSaltedBuilders[R](builder: HBaseReaderBuilder[R]) = {
