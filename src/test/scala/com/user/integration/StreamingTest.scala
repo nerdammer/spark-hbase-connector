@@ -47,7 +47,7 @@ class StreamingTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     })
 
 
-    Thread.sleep(5000)
+    Thread.sleep(20000)
 
     ssc.stop(false)
 
