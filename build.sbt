@@ -46,13 +46,6 @@ pomIncludeRepository := { _ => false }
 
 pomExtra :=
   <url>http://www.nerdammer.it</url>
-    <licenses>
-      <license>
-        <name>Apache License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
     <scm>
       <url>git@github.com:nerdammer/spark-hbase-connector</url>
       <connection>scm:git:git@github.com:nerdammer/spark-hbase-connector.git</connection>
