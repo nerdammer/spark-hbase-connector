@@ -254,7 +254,7 @@ implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
 }
 ```
 
-don't forget to override the *columns* method!
+Do not forget to override the *columns* method.
 
 And you can define an *implicit* reader:
 
@@ -264,47 +264,6 @@ implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
       id = Bytes.toInt(data.head.get),
       prg = Bytes.toInt(data.drop(1).head.get),
       name = Bytes.toString(data.drop(2).head.get)
-    )
-
-    override def columns = Seq("prg", "name")
-}
-```
-
-
-
-### Custom Mapping
-
-Custom mapping can be used in place of the default tuple-mapping algorithm. Just define one custom class:
-
-```scala
-class MyData(val id: Int, val prg: Int, val name: String) extends Serializable {
-
-}
-```
-
-Then you can define an *implicit* writer for that kind of objects:
-
-```scala
-implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
-    override def map(data: MyData): HBaseData =
-      Seq(
-        Some(Bytes.toBytes(data.id)),
-        Some(Bytes.toBytes(data.prg)),
-        Some(Bytes.toBytes(data.name))
-      )
-
-    override def columns = Seq("prg", "name")
-}
-```
-
-And you can define an *implicit* reader:
-
-```scala
-implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
-    override def map(data: HBaseData): MyData = new MyData(
-      Bytes.toInt(data.head.get),
-      Bytes.toInt(data.drop(1).head.get),
-      Bytes.toString(data.drop(2).head.get)
     )
 
     override def columns = Seq("prg", "name")
@@ -332,12 +291,14 @@ The converters above are low level and use directly the HBase API. Since this co
 simple and complex types, probably you would like to reuse them.
 The new *FieldReaderProxy* and *FieldWriterProxy* API has been created for this purpose.
 
-### Convert using FieldWriterProxy
+### High-level converters using FieldWriterProxy
 
 You can create a new *FieldWriterProxy* by declaring a conversion from your custom type to a predefined type.
 In this case, the predefined type it is a tuple composed of three basic fields:
 
 ```scala
+// MySimpleData is a case class
+
 implicit def myDataWriter: FieldWriter[MySimpleData] = new FieldWriterProxy[MySimpleData, (Int, Int, String)] {
 
   override def convert(data: MySimpleData) = (data.id, data.prg, data.name) // the first element is the row id
@@ -353,7 +314,7 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
   override def columns = Seq("prg", "name")
 
-  override def convert(data: (Int, Int, String)) = new MySimpleData(data._1, data._2, data._3)
+  override def convert(data: (Int, Int, String)) = MySimpleData(data._1, data._2, data._3)
 }
 
 ```
