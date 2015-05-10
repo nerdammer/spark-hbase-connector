@@ -19,7 +19,7 @@ case class HBaseSparkConf (
 }
 
 object HBaseSparkConf extends Serializable {
-  val DefaultHBaseHost = "localhost"
+  val DefaultHBaseHost = "hbase"
   val DefaultHBaseRootDir = "/hbase"
 
   def fromSparkConf(conf: SparkConf) = {

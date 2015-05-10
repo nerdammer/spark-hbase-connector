@@ -9,9 +9,16 @@ import scala.util.Random
 
 trait SaltingProvider[T] extends Serializable{
 
+  def salting: Array[T]
+
   def salt(rowKey: Array[Byte]): T
 
-  def verifySalting(salting: Iterable[T])(implicit writer: FieldWriter[T]) = {
+  protected def verify(implicit writer: FieldWriter[T]): Unit = {
+    if(length==0)
+      throw new IllegalArgumentException("Salting cannot have length 0")
+  }
+
+  def length(implicit writer: FieldWriter[T]): Int = {
     if(!writer.isInstanceOf[SingleColumnFieldWriter[T]]) {
       throw new IllegalArgumentException("Salting array must be composed of primitive types")
     }
@@ -22,10 +29,11 @@ trait SaltingProvider[T] extends Serializable{
       .map(o => o.getOrElse(Array[Byte]()))
       .map(a => a.size)
       .foldLeft(None.asInstanceOf[Option[Int]])((size, saltSize) => {
-      if (size.nonEmpty && size.get != saltSize)
-        throw new IllegalArgumentException(s"You cannot use salts with different lengths: ${size.get} and $saltSize")
-      Some(saltSize)
-    })
+        if (size.nonEmpty && size.get != saltSize)
+          throw new IllegalArgumentException(s"You cannot use salts with different lengths: ${size.get} and $saltSize")
+        Some(saltSize)
+      })
+      .get
   }
 
 }
@@ -36,9 +44,9 @@ trait SaltingProviderFactory[T] extends Serializable {
 
 }
 
-class RandomSaltingProvider[T: ClassTag](salting: Array[T])(implicit writer: FieldWriter[T]) extends SaltingProvider[T] {
+class RandomSaltingProvider[T: ClassTag](val salting: Array[T])(implicit writer: FieldWriter[T]) extends SaltingProvider[T] {
 
-  verifySalting(salting)
+  verify(writer)
 
   def this(saltingIterable: Iterable[T])(implicit writer: FieldWriter[T]) = this(saltingIterable.toArray)
 
@@ -48,9 +56,9 @@ class RandomSaltingProvider[T: ClassTag](salting: Array[T])(implicit writer: Fie
 
 }
 
-class HashSaltingProvider[T: ClassTag](salting: Array[T])(implicit writer: FieldWriter[T]) extends SaltingProvider[T] {
+class HashSaltingProvider[T: ClassTag](val salting: Array[T])(implicit writer: FieldWriter[T]) extends SaltingProvider[T] {
 
-  verifySalting(salting)
+  verify(writer)
 
   def this(saltingIterable: Iterable[T])(implicit writer: FieldWriter[T]) = this(saltingIterable.toArray)
 
