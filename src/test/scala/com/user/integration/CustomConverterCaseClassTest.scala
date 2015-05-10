@@ -1,11 +1,12 @@
 package com.user.integration
 
+import java.util.UUID
+
 import com.user.integration.CustomConverterCaseClassTest.MyData
 import it.nerdammer.spark.hbase._
-import it.nerdammer.spark.hbase.conversion.{ FieldReader, FieldWriter }
+import it.nerdammer.spark.hbase.conversion.{FieldReader, FieldWriter}
 import org.apache.hadoop.hbase.util.Bytes
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Matchers }
-import java.util.UUID
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 
 /**

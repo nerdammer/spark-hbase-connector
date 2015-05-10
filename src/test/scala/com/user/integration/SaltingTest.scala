@@ -26,6 +26,8 @@ class SaltingTest extends FlatSpec with Matchers with BeforeAndAfterAll with Ser
       .withSalting((0 to 9).map(s => s.toString))
       .save()
 
+
+
     val rdd = sc.hbaseTable[(String, String)](table)
       .select("col")
       .inColumnFamily(columnFamily)

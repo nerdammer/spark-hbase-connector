@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "0.9.5"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.0"
 ```
 
 The Maven style version of the dependency is:
@@ -20,7 +20,7 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>0.9.5</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -31,13 +31,11 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
 
-libraryDependencies += "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "provided",
+libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2"
 
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.10.1-hadoop2" % "provided"
+libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2"
 
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.10.1-hadoop2" % "provided"
-
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.10.1-hadoop2" % "provided"
+libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2"
 
 ```
 
@@ -187,16 +185,16 @@ val sc = new SparkContext(sparkConf)
 
 ### Usage in Spark Streaming
 The connector can be used in Spark Streaming applications with the same API.
-Currently, *DStreams* can only be written to HBase.
 
 ```scala
 // stream is a DStream[(Int, Int)]
 
-stream
-  .toHBaseTable("table")
-  .inColumnFamily("cf")
-  .toColumns("col1")
-  .save()
+stream.foreachRDD(rdd =>
+    rdd.toHBaseTable("table")
+      .inColumnFamily("cf")
+      .toColumns("col1")
+      .save()
+    )
 ```
 
 ## Advanced

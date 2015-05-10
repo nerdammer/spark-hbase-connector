@@ -1,6 +1,6 @@
 package it.nerdammer.spark
 
-import it.nerdammer.spark.hbase.conversion.{FieldWriterConversions, FieldReaderConversions}
+import it.nerdammer.spark.hbase.conversion.{FieldReaderConversions, FieldWriterConversions}
 
 package object hbase
                   extends HBaseSparkContextConversions

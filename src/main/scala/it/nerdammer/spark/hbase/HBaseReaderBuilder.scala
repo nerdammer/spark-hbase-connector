@@ -11,12 +11,12 @@ import scala.reflect.ClassTag
 
 case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       @transient sc: SparkContext,
-      table: String,
-      columnFamily: Option[String] = None,
-      columns: Iterable[String] = Seq.empty,
-      startRow: Option[String] = None,
-      stopRow: Option[String] = None,
-      salting: Iterable[String] = Seq.empty
+      private[hbase] val table: String,
+      private[hbase] val columnFamily: Option[String] = None,
+      private[hbase] val columns: Iterable[String] = Seq.empty,
+      private[hbase] val startRow: Option[String] = None,
+      private[hbase] val stopRow: Option[String] = None,
+      private[hbase] val salting: Iterable[String] = Seq.empty
       )
       (implicit mapper: FieldReader[R]) extends Serializable {
 
