@@ -16,8 +16,6 @@ libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" 
 
 
 
-
-
 libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "test"

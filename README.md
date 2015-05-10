@@ -24,26 +24,29 @@ The Maven style version of the dependency is:
 </dependency>
 ```
 
-Note that, the library depends on the following artifacts:
-
-```
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
-
-libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
-
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2"
-
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2"
-
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2"
-
-```
-
 If you don't like sbt or Maven, you can also check out this Github repo and execute the following command from the root folder:
 
     sbt package
 
 SBT will create the library jar under `target/scala-2.10`.
+
+Note that the library depends on the following artifacts:
+
+```
+libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet"), ExclusionRule(organization = "javax.servlet.jsp"), ExclusionRule(organization = "org.mortbay.jetty"))
+
+
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
+
+libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "test"
+
+```
 
 Check also if the current branch is passing all tests in Travis-CI before checking out (See "build" icon above).
 
