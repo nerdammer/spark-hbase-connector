@@ -255,7 +255,7 @@ implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
 
 Do not forget to override the *columns* method.
 
-And you can define an *implicit* reader:
+Then, you can define an *implicit* reader:
  
 ```scala
 implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
