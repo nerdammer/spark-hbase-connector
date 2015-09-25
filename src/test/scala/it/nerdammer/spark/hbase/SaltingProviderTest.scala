@@ -1,5 +1,7 @@
 package it.nerdammer.spark.hbase
 
+import java.util
+
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Try
@@ -29,6 +31,18 @@ class SaltingProviderTest extends FlatSpec with Matchers {
     val wrongSaltingTuple = Seq(("1", "2"), ("3", "4"))
     assert(Try({new RandomSaltingProvider(wrongSaltingTuple)}).isFailure)
     assert(Try({new HashSaltingProvider(wrongSaltingTuple)}).isFailure)
+
+  }
+
+  "hash salting provider" should "not throw exceptions if the hashcode of the row is negative" in {
+
+    val aSalting = Seq("1", "2", "3", "4")
+    val sp: SaltingProvider[String] = new HashSaltingProvider(aSalting)
+
+    val negativeHashArray = Array[Byte](1,-2,-3,-4, 5, 6, 7)
+    // util.Arrays.hashCode = -1724796311
+
+    assert(sp.salt(negativeHashArray)!=null)
 
   }
 

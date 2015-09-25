@@ -64,7 +64,7 @@ class HashSaltingProvider[T: ClassTag](val salting: Array[T])(implicit writer: F
 
   def hash(rowKey: Array[Byte]) = util.Arrays.hashCode(rowKey)
 
-  override def salt(rowKey: Array[Byte]): T = salting(hash(rowKey) % salting.size)
+  override def salt(rowKey: Array[Byte]): T = salting((hash(rowKey) & 0x7fffffff) % salting.size)
 
 }
 
