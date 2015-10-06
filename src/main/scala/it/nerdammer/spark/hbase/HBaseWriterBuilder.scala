@@ -77,7 +77,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
       val columns = convertedData.drop(1)
 
       if(columns.size!=columnsNames.size) {
-        throw new IllegalArgumentException(s"Wrong number of columns. Expected ${builder.columns.size} found ${columns.size}")
+        throw new IllegalArgumentException(s"Wrong number of columns. Expected ${columnsNames.size} found ${columns.size}")
       }
 
       val rowKey =
