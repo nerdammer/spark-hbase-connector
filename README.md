@@ -318,4 +318,4 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
 ```
 
-Note that we have not used the HBase API. Currently, *FieldWriterProxy* can read and write tuples up to 15 fields (including the row id).
+Note that we have not used the HBase API. Currently, *FieldWriterProxy* can read and write tuples up to 22 fields (including the row id).
