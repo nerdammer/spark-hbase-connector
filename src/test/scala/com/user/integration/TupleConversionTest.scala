@@ -188,7 +188,7 @@ class TupleConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll 
       .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18")
       .inColumnFamily(columnFamilies(0))
 
-    r18.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19, 1))
+    r18.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, 1))
       .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20")
       .inColumnFamily(columnFamilies(0))
       .save()
@@ -197,7 +197,7 @@ class TupleConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll 
       .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20")
       .inColumnFamily(columnFamilies(0))
 
-    r19.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19, t._20, 1))
+    r19.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, t._20+1, 1))
       .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21")
       .inColumnFamily(columnFamilies(0))
       .save()
@@ -206,7 +206,7 @@ class TupleConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll 
       .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21")
       .inColumnFamily(columnFamilies(0))
 
-    r20.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19, t._20, t._21, 1))
+    r20.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, t._20+1, t._21+1, 1))
       .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21", "c22")
       .inColumnFamily(columnFamilies(0))
       .save()
