@@ -151,23 +151,93 @@ class TupleConversionTest extends FlatSpec with Matchers with BeforeAndAfterAll 
     val r14 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
       .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14")
       .inColumnFamily(columnFamilies(0))
+
+    r14.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r15 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15")
+      .inColumnFamily(columnFamilies(0))
+
+    r15.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r16 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16")
+      .inColumnFamily(columnFamilies(0))
+
+    r16.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r17 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17")
+      .inColumnFamily(columnFamilies(0))
+
+    r17.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r18 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18")
+      .inColumnFamily(columnFamilies(0))
+
+    r18.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r19 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20")
+      .inColumnFamily(columnFamilies(0))
+
+    r19.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, t._20+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r20 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21")
+      .inColumnFamily(columnFamilies(0))
+
+    r20.map(t => (t._1, t._2+1, t._3+1, t._4+1, t._5+1, t._6+1, t._7+1, t._8+1, t._9+1, t._10+1, t._11+1, t._12+1, t._13+1, t._14+1, t._15+1, t._16+1, t._17+1, t._18+1, t._19+1, t._20+1, t._21+1, 1))
+      .toHBaseTable(tables(0)).toColumns("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21", "c22")
+      .inColumnFamily(columnFamilies(0))
+      .save()
+
+    val r21 = sc.hbaseTable[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)](tables(0))
+      .select("c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c20", "c21", "c22")
+      .inColumnFamily(columnFamilies(0))
       .take(1).head
 
 
-    assert(r14._2==14)
-    assert(r14._3==13)
-    assert(r14._4==12)
-    assert(r14._5==11)
-    assert(r14._6==10)
-    assert(r14._7==9)
-    assert(r14._8==8)
-    assert(r14._9==7)
-    assert(r14._10==6)
-    assert(r14._11==5)
-    assert(r14._12==4)
-    assert(r14._13==3)
-    assert(r14._14==2)
-    assert(r14._15==1)
+    assert(r21._2==21)
+    assert(r21._3==20)
+    assert(r21._4==19)
+    assert(r21._5==18)
+    assert(r21._6==17)
+    assert(r21._7==16)
+    assert(r21._8==15)
+    assert(r21._9==14)
+    assert(r21._10==13)
+    assert(r21._11==12)
+    assert(r21._12==11)
+    assert(r21._13==10)
+    assert(r21._14==9)
+    assert(r21._15==8)
+    assert(r21._16==7)
+    assert(r21._17==6)
+    assert(r21._18==5)
+    assert(r21._19==4)
+    assert(r21._20==3)
+    assert(r21._21==2)
+    assert(r21._22==1)
 
   }
 

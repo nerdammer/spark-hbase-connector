@@ -1,6 +1,6 @@
 language: scala
 scala:
-   - 2.10.4
+   - 2.10.5
 
 before_install: ./scripts/ci/before-install.sh
 install:        ./scripts/ci/install.sh

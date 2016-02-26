@@ -2,17 +2,17 @@ organization := "it.nerdammer.bigdata"
 
 name := "spark-hbase-connector"
 
-version := "1.0.1"
+version := "1.0.2"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.10.5"
 
-libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.6.0" % "provided"
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
 
 libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
@@ -20,7 +20,7 @@ libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 spName := "nerdammer/spark-hbase-connector"
 
-sparkVersion := "1.2.0"
+sparkVersion := "1.6.0"
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".githubcredentials")
 

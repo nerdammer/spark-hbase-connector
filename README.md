@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.1"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.2"
 ```
 
 The Maven style version of the dependency is:
@@ -20,7 +20,7 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
@@ -33,21 +33,25 @@ SBT will create the library jar under `target/scala-2.10`.
 Note that the library depends on the following artifacts:
 
 ```
-libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.2.0" % "provided"
+libraryDependencies +=  "org.apache.spark" % "spark-core_2.10" % "1.6.0" % "provided"
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-common" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-client" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
-libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "0.98.11-hadoop2" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
+libraryDependencies +=  "org.apache.hbase" % "hbase-server" % "1.0.3" excludeAll(ExclusionRule(organization = "javax.servlet", name="javax.servlet-api"), ExclusionRule(organization = "org.mortbay.jetty", name="jetty"), ExclusionRule(organization = "org.mortbay.jetty", name="servlet-api-2.5"))
 
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
-libraryDependencies +=  "org.apache.spark" % "spark-streaming_2.10" % "1.2.0" % "test"
+libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 ```
 
 Check also if the current branch is passing all tests in Travis-CI before checking out (See "build" icon above).
+
+## Basic Hostname Configuration
+
+If you need to contact an host different from `localhost` you need to set it in the `spark.hbase.host` system property.
+You can do it using the JVM settings (`-Dspark.hbase.host=the_zookeeper_quorum_host`) or using the `--conf` setting if you are using the Spark shell.
 
 ## Writing to HBase (Basic)
 
@@ -318,4 +322,4 @@ implicit def myDataReader: FieldReader[MySimpleData] = new FieldReaderProxy[(Int
 
 ```
 
-Note that we have not used the HBase API. Currently, *FieldWriterProxy* can read and write tuples up to 15 fields (including the row id).
+Note that we have not used the HBase API. Currently, *FieldWriterProxy* can read and write tuples up to 22 fields (including the row id).
