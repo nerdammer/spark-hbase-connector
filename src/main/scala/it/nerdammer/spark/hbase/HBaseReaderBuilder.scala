@@ -16,7 +16,8 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       private[hbase] val columns: Iterable[String] = Seq.empty,
       private[hbase] val startRow: Option[String] = None,
       private[hbase] val stopRow: Option[String] = None,
-      private[hbase] val salting: Iterable[String] = Seq.empty
+      private[hbase] val salting: Iterable[String] = Seq.empty,
+      private[hbase] val conf: Map[String, String] = Map.empty
       )
       (implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]) extends Serializable {
 
@@ -57,6 +58,10 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       this.copy(salting = salting)
     }
 
+    def withConf(entry: (String, String)) = this.copy(conf = conf + entry)
+
+    def withConf(entries: Map[String, String]) = this.copy(conf = conf ++ entries)
+  
 }
 
 
@@ -80,7 +85,7 @@ trait HBaseReaderBuilderConversions extends Serializable {
   }
 
   def toSimpleHBaseRDD[R: ClassTag](builder: HBaseReaderBuilder[R], saltingLength: Int = 0)(implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]): HBaseSimpleRDD[R] = {
-    val hbaseConfig = HBaseSparkConf.fromSparkConf(builder.sc.getConf).createHadoopBaseConfig()
+    val hbaseConfig = HBaseSparkConf.fromSparkConf(builder.sc.getConf).createHadoopBaseConfig(builder.conf)
 
     hbaseConfig.set(TableInputFormat.INPUT_TABLE, builder.table)
 
