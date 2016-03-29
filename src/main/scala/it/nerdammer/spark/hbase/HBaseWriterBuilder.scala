@@ -6,7 +6,6 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
@@ -16,7 +15,8 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       private[hbase] val table: String,
       private[hbase] val columnFamily: Option[String] = None,
       private[hbase] val columns: Iterable[String] = Seq.empty,
-      private[hbase] val salting: Iterable[String] = Seq.empty
+      private[hbase] val salting: Iterable[String] = Seq.empty,
+      private[hbase] val conf: Map[String, String] = Map.empty
       )(implicit mapper: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
@@ -41,6 +41,14 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       this.copy(salting = salting)
     }
 
+    def withConf(entry: (String, String)) = {
+      this.copy(conf = conf + entry)
+    }
+
+    def withConf(entries: Map[String, String]) = {
+      this.copy(conf = conf ++ entries)
+    }
+
 }
 
 class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
@@ -53,7 +61,7 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
 
   def save(): Unit = {
 
-    val conf = HBaseSparkConf.fromSparkConf(builder.rdd.sparkContext.getConf).createHadoopBaseConfig()
+    val conf = HBaseSparkConf.fromSparkConf(builder.rdd.sparkContext.getConf).createHadoopBaseConfig(builder.conf)
     conf.set(TableOutputFormat.OUTPUT_TABLE, builder.table)
 
     val job = Job.getInstance(conf)
