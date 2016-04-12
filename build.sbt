@@ -45,16 +45,16 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra :=
-  <url>http://www.nerdammer.it</url>
+  <url>http://www.nicolaferraro.me</url>
     <scm>
       <url>git@github.com:nerdammer/spark-hbase-connector</url>
       <connection>scm:git:git@github.com:nerdammer/spark-hbase-connector.git</connection>
     </scm>
     <developers>
       <developer>
-        <id>nibbio84</id>
+        <id>nicolaferraro</id>
         <name>Nicola Ferraro</name>
-        <url>http://www.nerdammer.it</url>
+        <url>http://www.nicolaferraro.me</url>
       </developer>
     </developers>
 

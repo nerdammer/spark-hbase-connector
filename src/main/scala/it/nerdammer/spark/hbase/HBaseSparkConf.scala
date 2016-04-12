@@ -1,31 +1,33 @@
 package it.nerdammer.spark.hbase
 
-import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.hadoop.hbase.{HConstants, HBaseConfiguration}
 import org.apache.spark.SparkConf
 
 case class HBaseSparkConf (
-  hbaseHost: String = HBaseSparkConf.DefaultHBaseHost,
-  hbaseRootDir: String = HBaseSparkConf.DefaultHBaseRootDir) extends Serializable {
+  hbaseHost: Option[String] = None,
+  hbaseXmlConfigFile: String = "hbase-site.xml") extends Serializable {
 
   def createHadoopBaseConfig() = {
     val conf = HBaseConfiguration.create
-    conf.setBoolean("hbase.cluster.distributed", true)
-    conf.setInt("hbase.client.scanner.caching", 10000)
-    conf.set("hbase.rootdir", hbaseRootDir)
-    conf.set("hbase.zookeeper.quorum", hbaseHost)
+
+    val xmlFile = Option(getClass.getClassLoader.getResource(hbaseXmlConfigFile))
+    xmlFile.foreach(f => conf.addResource(f))
+
+    hbaseHost.foreach(h => conf.set(HConstants.ZOOKEEPER_QUORUM, h))
+    if(Option(conf.get(HConstants.ZOOKEEPER_QUORUM)).isEmpty)
+      conf.set(HConstants.ZOOKEEPER_QUORUM, HBaseSparkConf.DefaultHBaseHost)
 
     conf
   }
 }
 
 object HBaseSparkConf extends Serializable {
+
   val DefaultHBaseHost = "localhost"
-  val DefaultHBaseRootDir = "/hbase"
 
   def fromSparkConf(conf: SparkConf) = {
     HBaseSparkConf(
-      hbaseHost = conf.get("spark.hbase.host", DefaultHBaseHost),
-      hbaseRootDir = conf.get("spark.hbase.root.dir", DefaultHBaseRootDir)
+      hbaseHost = Option(conf.get("spark.hbase.host", null))
     )
   }
 }
