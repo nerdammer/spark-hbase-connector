@@ -56,13 +56,7 @@ The HBase Zookeeper quorum host can be set in multiple ways.
 
     spark-submit --conf spark.hbase.host=thehost ...
 
-(3) Using the hbase-site.xml file (in the root of your jar, i.e. `src/main/resources/hbase-site.xml`):
-
-
-    java -Dspark.hbase.host=thehost -jar ....
-
-(3) If you have access to the JVM parameters:
-
+(2) Using the hbase-site.xml file (in the root of your jar, i.e. `src/main/resources/hbase-site.xml`):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -76,6 +70,9 @@ The HBase Zookeeper quorum host can be set in multiple ways.
 </configuration>
 ```
 
+(3) If you have access to the JVM parameters:
+
+    java -Dspark.hbase.host=thehost -jar ....
 
 (4) Using the *scala* code:
 
