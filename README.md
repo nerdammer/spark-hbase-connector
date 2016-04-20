@@ -11,7 +11,7 @@ If you want to read and write data to HBase, you don't need using the Hadoop API
 The spark-hbase-connector is available in Sonatype repository. You can just add the following dependency in `sbt`:
 
 ```
-libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.2"
+libraryDependencies += "it.nerdammer.bigdata" % "spark-hbase-connector_2.10" % "1.0.3"
 ```
 
 The Maven style version of the dependency is:
@@ -20,7 +20,7 @@ The Maven style version of the dependency is:
 <dependency>
   <groupId>it.nerdammer.bigdata</groupId>
   <artifactId>spark-hbase-connector_2.10</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
@@ -48,11 +48,42 @@ libraryDependencies +=  "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test"
 
 Check also if the current branch is passing all tests in Travis-CI before checking out (See "build" icon above).
 
-## Basic Hostname Configuration
+## Setting the HBase host
+The HBase Zookeeper quorum host can be set in multiple ways.
 
-If you need to contact an host different from `localhost` you need to set it in the `spark.hbase.host` system property.
-You can do it using the JVM settings (`-Dspark.hbase.host=the_zookeeper_quorum_host`) or using the `--conf` setting if you are using the Spark shell.
+(1) Passing the host to the `spark-submit` command:
 
+
+    spark-submit --conf spark.hbase.host=thehost ...
+
+(2) Using the hbase-site.xml file (in the root of your jar, i.e. `src/main/resources/hbase-site.xml`):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property>
+		<name>hbase.zookeeper.quorum</name>
+		<value>thehost</value>
+	</property>
+	
+	<!-- Put any other property here, it will be used -->
+</configuration>
+```
+
+(3) If you have access to the JVM parameters:
+
+    java -Dspark.hbase.host=thehost -jar ....
+
+(4) Using the *scala* code:
+
+
+```scala
+val sparkConf = new SparkConf()
+...
+sparkConf.set("spark.hbase.host", "thehost")
+...
+val sc = new SparkContext(sparkConf)
+```
 ## Writing to HBase (Basic)
 
 Writing to HBase is very easy. Remember to import the implicit conversions:
@@ -162,32 +193,6 @@ val count = sc.hbaseTable[(String, String)]("mytable")
 ```
 
 In the *reading example* above, the default column family `cf2` applies only to `column2`.
-
-### Setting the HBase host
-The HBase Zookeeper quorum host can be set in multiple ways.
-
-(1) Passing the host to the `spark-submit` command:
-
-
-    spark-submit --conf spark.hbase.host=thehost ...
-
-
-(2) If you have access to the JVM parameters:
-
-
-    java -Dspark.hbase.host=thehost -jar ....
-
-
-(3) Using the *scala* code:
-
-
-```scala
-val sparkConf = new SparkConf()
-...
-sparkConf.set("spark.hbase.host", "thehost")
-...
-val sc = new SparkContext(sparkConf)
-```
 
 ### Usage in Spark Streaming
 The connector can be used in Spark Streaming applications with the same API.

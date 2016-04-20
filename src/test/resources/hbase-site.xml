@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property>
+		<name>file.stream-buffer-size</name>
+		<value>8000</value>
+	</property>
+</configuration>
