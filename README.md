@@ -148,7 +148,7 @@ val hBaseRDD = sc.hbaseTable[(Int, String)]("mytable")
 
 This way, only the columns that you have chosen will be selected.
 
-If you want to select multiple columns from different column families, you don't have to provide prefix for the provided column family as a argument at inColumnFamily(COLUMN_FAMILY_NAME) but for other column family columns, you need to provide prefix with :(colon).
+you don't have to provide column family name as a prefix to column name for the provided column family at inColumnFamily(COLUMN_FAMILY_NAME) but for other columns you need to provide prefix with :(colon).
 
 ```scala
 val hBaseRDD = sc.hbaseTable[(Int, String, String)]("mytable")
