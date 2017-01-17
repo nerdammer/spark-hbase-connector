@@ -84,6 +84,13 @@ sparkConf.set("spark.hbase.host", "thehost")
 ...
 val sc = new SparkContext(sparkConf)
 ```
+
+or you can directly configure with SparkContext:
+
+```scala
+sparkContext.hadoopConfiguration.set("spark.hbase.host", "thehost")
+```
+
 ## Writing to HBase (Basic)
 
 Writing to HBase is very easy. Remember to import the implicit conversions:
@@ -140,6 +147,14 @@ val hBaseRDD = sc.hbaseTable[(Int, String)]("mytable")
 ```
 
 This way, only the columns that you have chosen will be selected.
+
+If you want to select multiple columns from different column families, you don't have to provide prefix for the provided column family as a argument at inColumnFamily(COLUMN_FAMILY_NAME) but for other column family columns, you need to provide prefix with :(colon).
+
+```scala
+val hBaseRDD = sc.hbaseTable[(Int, String, String)]("mytable")
+    .select("column1","columnfamily2:column2","columnfamily3:column3")
+    .inColumnFamily("columnfamily1")
+```
 
 ## Other Topics
 
