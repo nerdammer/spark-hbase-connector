@@ -158,43 +158,6 @@ val hBaseRDD = sc.hbaseTable[(Int, String, String)]("mytable")
 
 ## Other Topics
 
-### HBaseRDD as Spark Dataframe
-You can convert hBaseRDD to Spark Dataframe for further Spark Transformations and moving to any other NoSQL Databases such as (MongoDB, Hive etc).
-
-``` scala
-val hBaseRDD = sparkContext.hbaseTable[(Option[String], Option[String], Option[String], Option[String], Option[String])](HBASE_TABLE_NAME).select("column1", "column2","column3","column4","column5").inColumnFamily(HBASE_COLUMN_FAMILY)
-```
-
-Iterating hBaseRDD to create ``` scala org.apache.spark.rdd.RDD [org.apache.spark.sql.Row]``` (i.e RDD[Row]) in our example.
-
-``` scala
-val rowRDD = hBaseRDD.map(i => Row(i._1.get,i._2.get,i._3.get,i._4.get,i._5.get))
-```
-Creating schema structure for above SparkRDD[Row]
-
-``` scala
-object myschema {
-      val column1 = StructField("column1", StringType)
-      val column2 = StructField("column2", StringType)
-      val column3 = StructField("column2", StringType)
-      val column4 = StructField("column2", StringType)
-      val column5 = StructField("column2", StringType)
-      val struct = StructType(Array(column1,column2,column3,column4,column5))
-    }
-```
-Create Spark Dataframe with RDD[Row] and Schema Structure
-
-``` scala
-val myDf = sqlContext.createDataFrame(rowRDD,myschema.struct)
-```
-
-Now you can apply any spark transformations and actions, for example.
-
-``` scala
-myDF.show()
-```
-It will show you Dataframe's Data in tabular structure.
-
 ### Filtering
 It is possible to filter the results by prefixes of row keys. Filtering also supports additional salting prefixes
 (see the [salting](#salting) section).
@@ -258,6 +221,57 @@ stream.foreachRDD(rdd =>
       .toColumns("col1")
       .save()
     )
+```
+### HBaseRDD as Spark Dataframe
+You can convert hBaseRDD to Spark Dataframe for further Spark Transformations and moving to any other NoSQL Databases such as (MongoDB, Hive etc).
+
+``` scala
+val hBaseRDD = sparkContext.hbaseTable[(Option[String], Option[String], Option[String], Option[String], Option[String])](HBASE_TABLE_NAME).select("column1", "column2","column3","column4","column5").inColumnFamily(HBASE_COLUMN_FAMILY)
+```
+
+Iterating hBaseRDD to create ``` scala org.apache.spark.rdd.RDD [org.apache.spark.sql.Row]``` (i.e RDD[Row]) in our example.
+
+``` scala
+val rowRDD = hBaseRDD.map(i => Row(i._1.get,i._2.get,i._3.get,i._4.get,i._5.get))
+```
+Creating schema structure for above SparkRDD[Row]
+
+``` scala
+object myschema {
+      val column1 = StructField("column1", StringType)
+      val column2 = StructField("column2", StringType)
+      val column3 = StructField("column2", StringType)
+      val column4 = StructField("column2", StringType)
+      val column5 = StructField("column2", StringType)
+      val struct = StructType(Array(column1,column2,column3,column4,column5))
+    }
+```
+Create Spark Dataframe with RDD[Row] and Schema Structure
+
+``` scala
+val myDf = sqlContext.createDataFrame(rowRDD,myschema.struct)
+```
+
+Now you can apply any spark transformations and actions, for example.
+
+``` scala
+myDF.show()
+```
+It will show you Dataframe's Data in tabular structure.
+
+### SparkSQL on HBase
+
+Hence, with previous example. you have converted hBaseRDD to appropriate Spark Dataframe you can apply SparkSQL on Dataframe.
+
+Creating temporary table in spark.
+
+``` scala
+myDF.registerTempTable("mytable")
+
+Applying SparkSQL on created temporary table.
+
+```
+sqlContext.sql("SELECT * FROM mytable").show()
 ```
 
 ## Advanced
