@@ -267,7 +267,7 @@ Creating temporary table in spark.
 
 ``` scala
 myDF.registerTempTable("mytable")
-
+```
 Applying SparkSQL on created temporary table.
 
 ```
