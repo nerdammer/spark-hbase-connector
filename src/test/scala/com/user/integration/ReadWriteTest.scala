@@ -67,7 +67,43 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     count should be(250)
   }
 
+  "reading" should "filter by timestamp range" in {
+    val sc = IntegrationUtils.sparkContext
+
+    val data = sc.parallelize(1 to 100).map(i => (i.toString, i.toString, "1510679475915"))
+    val data2 = sc.parallelize(101 to 200).map(i => (i.toString, i.toString, "1510679475921"))
 
 
+    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+
+    val count = sc.hbaseTable[(String, String)](tables(0))
+      .select("column1")
+      .inColumnFamily(columnFamily)
+      .withTimerangeStartRow("1510679475910")
+      .withTimerangeEndRow("1510679475920")
+      .count
+
+    count should be (100)
+  }
+
+  "reading" should "filter by timestamp" in {
+    val sc = IntegrationUtils.sparkContext
+
+    val data = sc.parallelize(1 to 100).map(i => (i.toString, i.toString, "1510679475915"))
+    val data2 = sc.parallelize(101 to 200).map(i => (i.toString, i.toString, "1510679475921"))
+
+
+    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+
+    val count = sc.hbaseTable[(String, String)](tables(0))
+      .select("column1")
+      .inColumnFamily(columnFamily)
+      .withTimestampRow("1510679475915")
+      .count
+
+    count should be (100)
+  }
   // TODO clear message for unknown columns
 }

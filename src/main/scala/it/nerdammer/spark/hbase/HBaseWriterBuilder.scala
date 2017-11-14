@@ -52,7 +52,6 @@ class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWrite
 class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: FieldWriter[R], saltingProviderFactory: SaltingProviderFactory[String]) extends Serializable {
 
   def save(): Unit = {
-
     val conf = HBaseSparkConf.fromSparkConf(builder.rdd.sparkContext.getConf).createHadoopBaseConfig()
     conf.set(TableOutputFormat.OUTPUT_TABLE, builder.table)
 
@@ -64,17 +63,16 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
       else Some(saltingProviderFactory.getSaltingProvider(builder.salting))
 
     val transRDD = builder.rdd.map(r => {
-
       val convertedData: Iterable[Option[Array[Byte]]] = mapper.map(r)
 
       if(convertedData.size<2) {
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
 
-      val columnsNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
+      var columnsNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
 
       val rawRowKey = convertedData.head.get
-      val columns = convertedData.drop(1)
+      var columns = convertedData.drop(1)
 
       if(columns.size!=columnsNames.size) {
         throw new IllegalArgumentException(s"Wrong number of columns. Expected ${columnsNames.size} found ${columns.size}")
@@ -84,7 +82,21 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
         if(saltingProvider.isEmpty) rawRowKey
         else Bytes.toBytes(saltingProvider.get.salt(rawRowKey) + Bytes.toString(rawRowKey))
 
-      val put = new Put(rowKey)
+      val timestamp: Option[Long] = if (columnsNames.lastOption.get == "timestamp") {
+        columns = columns.dropRight(1)
+        columnsNames = columnsNames.dropRight(1)
+        Some(Bytes.toString(convertedData.last.get).toLong)
+      }
+      else {
+        None
+      }
+
+      val put = timestamp match {
+        case Some(time) =>
+          new Put(rowKey, time.get)
+        case None =>
+          new Put(rowKey)
+      }
 
       columnsNames.zip(columns).foreach {
         case (name, Some(value)) => {

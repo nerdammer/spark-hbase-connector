@@ -16,6 +16,9 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       private[hbase] val columns: Iterable[String] = Seq.empty,
       private[hbase] val startRow: Option[String] = None,
       private[hbase] val stopRow: Option[String] = None,
+      private[hbase] val timestampRow: Option[String] = None,
+      private[hbase] val timerangeStartRow: Option[String] = None,
+      private[hbase] val timerangeEndRow: Option[String] = None,
       private[hbase] val salting: Iterable[String] = Seq.empty
       )
       (implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]) extends Serializable {
@@ -50,6 +53,27 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       this.copy(stopRow = Some(stopRow))
     }
 
+    def withTimestampRow(timestampRow: String) = {
+      require(timestampRow.nonEmpty, s"Invalid timestamp row '$timestampRow'")
+      require(this.timestampRow.isEmpty, "Timestamp row has already been set")
+
+      this.copy(timestampRow = Some(timestampRow))
+    }
+
+    def withTimerangeStartRow(timerangeStartRow: String) = {
+      require(timerangeStartRow.nonEmpty, s"Invalid timestamp start row '$timerangeStartRow'")
+      require(this.timerangeStartRow.isEmpty, "Timestamp start row has already been set")
+
+      this.copy(timerangeStartRow = Some(timerangeStartRow))
+    }
+
+    def withTimerangeEndRow(timerangeEndRow: String) = {
+      require(timerangeEndRow.nonEmpty, s"Invalid timestamp start row '$timerangeEndRow'")
+      require(this.timerangeEndRow.isEmpty, "Timestamp start row has already been set")
+
+      this.copy(timerangeEndRow = Some(timerangeEndRow))
+    }
+
     def withSalting(salting: Iterable[String]) = {
       require(salting.size > 1, "Invalid salting. Two or more elements are required")
       require(this.salting.isEmpty, "Salting has already been set")
@@ -58,7 +82,6 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
     }
 
 }
-
 
 trait HBaseReaderBuilderConversions extends Serializable {
 
@@ -98,6 +121,18 @@ trait HBaseReaderBuilderConversions extends Serializable {
 
     if(builder.stopRow.nonEmpty) {
       hbaseConfig.set(TableInputFormat.SCAN_ROW_STOP, builder.stopRow.get)
+    }
+
+    if(builder.timestampRow.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMESTAMP, builder.timestampRow.get)
+    }
+
+    if(builder.timerangeStartRow.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_START, builder.timerangeStartRow.get)
+    }
+
+    if(builder.timerangeEndRow.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_END, builder.timerangeEndRow.get)
     }
 
     val rdd = builder.sc.newAPIHadoopRDD(hbaseConfig, classOf[TableInputFormat],
