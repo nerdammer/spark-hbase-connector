@@ -82,20 +82,14 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
         if(saltingProvider.isEmpty) rawRowKey
         else Bytes.toBytes(saltingProvider.get.salt(rawRowKey) + Bytes.toString(rawRowKey))
 
-      val timestamp: Option[Long] = if (columnsNames.lastOption.get == "timestamp") {
+      val put = if (columnsNames.lastOption.get == "timestamp") {
         columns = columns.dropRight(1)
         columnsNames = columnsNames.dropRight(1)
-        Some(Bytes.toString(convertedData.last.get).toLong)
+        val timestamp = Bytes.toString(convertedData.last.get).toLong
+        new Put(rowKey, timestamp)
       }
       else {
-        None
-      }
-
-      val put = timestamp match {
-        case Some(time) =>
-          new Put(rowKey, time.get)
-        case None =>
-          new Put(rowKey)
+        new Put(rowKey)
       }
 
       columnsNames.zip(columns).foreach {
