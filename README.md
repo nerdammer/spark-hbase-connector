@@ -65,7 +65,7 @@ The HBase Zookeeper quorum host can be set in multiple ways.
 		<name>hbase.zookeeper.quorum</name>
 		<value>thehost</value>
 	</property>
-	
+
 	<!-- Put any other property here, it will be used -->
 </configuration>
 ```
@@ -106,8 +106,7 @@ val rdd = sc.parallelize(1 to 100)
             .map(i => (i.toString, i+1, "Hello"))
 ```
 
-This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**,
-the others will be assigned to columns.
+This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**, if the last column match **timestamp** will be set as timestamp on the Hbase record, the others will be assigned to columns.
 
 ```scala
 rdd.toHBaseTable("mytable")
@@ -118,6 +117,19 @@ rdd.toHBaseTable("mytable")
 
 You are done. HBase now contains *100* rows in table *mytable*, each row containing two values for columns *mycf:column1* and *mycf:column2*.
 
+### With Timestamp:
+
+```scala
+val rdd = sc.parallelize(1 to 100)
+            .map(i => (i.toString, i+1, "Hello", "1510679475915"))
+```
+
+```scala
+rdd.toHBaseTable("mytable")
+    .toColumns("column1", "column2", "timestamp")
+    .inColumnFamily("mycf")
+    .save()
+```
 
 ## Reading from HBase (Basic)
 
@@ -172,6 +184,25 @@ val rdd = sc.hbaseTable[(String, String)]("table")
 
 The example above retrieves all rows having a row key *greater or equal* to `00000` and *lower* than `00500`.
 The options `withStartRow` and `withStopRow` can also be used separately.
+
+It is also possible to filter by Time range and Timestamp
+
+
+```scala
+val rdd = sc.hbaseTable[(String, String)]("table")
+      .select("col")
+      .inColumnFamily(columnFamily)
+      .withTimerangeStartRow("1510679475915")
+      .withTimerangeEndRow("1510679475920")
+```
+
+Timestamp
+```scala
+val rdd = sc.hbaseTable[(String, String)]("table")
+      .select("col")
+      .inColumnFamily(columnFamily)
+      .withTimestampRow("1510679475915")
+```
 
 ### Managing Empty Columns
 Empty columns are managed by using `Option[T]` types:
@@ -331,7 +362,7 @@ implicit def myDataWriter: FieldWriter[MyData] = new FieldWriter[MyData] {
 Do not forget to override the *columns* method.
 
 Then, you can define an *implicit* reader:
- 
+
 ```scala
 implicit def myDataReader: FieldReader[MyData] = new FieldReader[MyData] {
     override def map(data: HBaseData): MyData = MyData(
