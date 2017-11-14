@@ -106,7 +106,7 @@ val rdd = sc.parallelize(1 to 100)
             .map(i => (i.toString, i+1, "Hello"))
 ```
 
-This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**, if the last column match **timestamp** will be set as timestamp on the Hbase record, the others will be assigned to columns.
+This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**.
 
 ```scala
 rdd.toHBaseTable("mytable")
@@ -118,6 +118,8 @@ rdd.toHBaseTable("mytable")
 You are done. HBase now contains *100* rows in table *mytable*, each row containing two values for columns *mycf:column1* and *mycf:column2*.
 
 ### With Timestamp:
+
+If the last column match **timestamp** will be set as timestamp on the Hbase record, the others will be assigned to columns.
 
 ```scala
 val rdd = sc.parallelize(1 to 100)
@@ -187,6 +189,7 @@ The options `withStartRow` and `withStopRow` can also be used separately.
 
 It is also possible to filter by Time range and Timestamp
 
+### Time range
 
 ```scala
 val rdd = sc.hbaseTable[(String, String)]("table")
@@ -196,7 +199,8 @@ val rdd = sc.hbaseTable[(String, String)]("table")
       .withTimerangeEndRow("1510679475920")
 ```
 
-Timestamp
+### Timestamp
+
 ```scala
 val rdd = sc.hbaseTable[(String, String)]("table")
       .select("col")
