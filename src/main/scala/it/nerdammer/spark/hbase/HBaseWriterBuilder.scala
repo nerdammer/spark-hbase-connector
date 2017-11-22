@@ -16,7 +16,8 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       private[hbase] val table: String,
       private[hbase] val columnFamily: Option[String] = None,
       private[hbase] val columns: Iterable[String] = Seq.empty,
-      private[hbase] val salting: Iterable[String] = Seq.empty
+      private[hbase] val salting: Iterable[String] = Seq.empty,
+      private[hbase] val timestampColumn: Option[String] = None
       )(implicit mapper: FieldWriter[R], saltingProvider: SaltingProviderFactory[String])
       extends Serializable {
 
@@ -41,6 +42,9 @@ case class HBaseWriterBuilder[R: ClassTag] private[hbase] (
       this.copy(salting = salting)
     }
 
+    def usingTimestampRecord(column: String) = {
+      this.copy(timestampColumn = Some(column))
+    }
 }
 
 class HBaseWriterBuildable[R: ClassTag](rdd: RDD[R])(implicit mapper: FieldWriter[R], sal: SaltingProviderFactory[String]) extends Serializable {
@@ -69,10 +73,10 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
         throw new IllegalArgumentException("Expected at least two converted values, the first one should be the row key")
       }
 
-      var columnsNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
+      val columnsNames = HBaseUtils.chosenColumns(builder.columns, mapper.columns)
 
       val rawRowKey = convertedData.head.get
-      var columns = convertedData.drop(1)
+      val columns = convertedData.drop(1)
 
       if(columns.size!=columnsNames.size) {
         throw new IllegalArgumentException(s"Wrong number of columns. Expected ${columnsNames.size} found ${columns.size}")
@@ -82,17 +86,23 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
         if(saltingProvider.isEmpty) rawRowKey
         else Bytes.toBytes(saltingProvider.get.salt(rawRowKey) + Bytes.toString(rawRowKey))
 
-      val put = if (columnsNames.lastOption.get == "timestamp") {
-        columns = columns.dropRight(1)
-        columnsNames = columnsNames.dropRight(1)
-        val timestamp = Bytes.toString(convertedData.last.get).toLong
+      var record = columnsNames.zip(columns)
+
+      val put = if (builder.timestampColumn != None) {
+        val findTimestampColumn = (item:(String, Option[Array[Byte]])) => item._1 ==  builder.timestampColumn.get
+
+        val timestamp = Bytes.toString(record.find(findTimestampColumn).get._2.get).toLong
+
+        record = record.dropWhile(findTimestampColumn)
+
         new Put(rowKey, timestamp)
       }
       else {
+
         new Put(rowKey)
       }
 
-      columnsNames.zip(columns).foreach {
+      record.foreach {
         case (name, Some(value)) => {
           val family = if(name.contains(':')) Bytes.toBytes(name.substring(0, name.indexOf(':'))) else Bytes.toBytes(builder.columnFamily.get)
           val column = if(name.contains(':')) Bytes.toBytes(name.substring(name.indexOf(':') + 1)) else Bytes.toBytes(name)

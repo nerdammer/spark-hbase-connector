@@ -73,9 +73,8 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val data = sc.parallelize(1 to 100).map(i => (i.toString, i.toString, "1510679475915"))
     val data2 = sc.parallelize(101 to 200).map(i => (i.toString, i.toString, "1510679475921"))
 
-
-    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
-    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").usingTimestampRecord("timestamp").inColumnFamily(columnFamily).save()
+    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").usingTimestampRecord("timestamp").inColumnFamily(columnFamily).save()
 
     val count = sc.hbaseTable[(String, String)](tables(0))
       .select("column1")
@@ -94,8 +93,8 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val data2 = sc.parallelize(101 to 200).map(i => (i.toString, i.toString, "1510679475921"))
 
 
-    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
-    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").inColumnFamily(columnFamily).save()
+    data.toHBaseTable(tables(0)).toColumns("column1", "timestamp").usingTimestampRecord("timestamp").inColumnFamily(columnFamily).save()
+    data2.toHBaseTable(tables(0)).toColumns("column1", "timestamp").usingTimestampRecord("timestamp").inColumnFamily(columnFamily).save()
 
     val count = sc.hbaseTable[(String, String)](tables(0))
       .select("column1")

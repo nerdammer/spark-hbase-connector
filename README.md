@@ -119,7 +119,7 @@ You are done. HBase now contains *100* rows in table *mytable*, each row contain
 
 ### With Timestamp:
 
-If the last column match **timestamp** will be set as timestamp on the Hbase record, the others will be assigned to columns.
+It's possible to set the timestamp to the recorded and this element will not be saved to HBase as a column. `usingTimestampRecord("timestamp_col_name")`  It's responsible to build this behavior.
 
 ```scala
 val rdd = sc.parallelize(1 to 100)
@@ -130,6 +130,7 @@ val rdd = sc.parallelize(1 to 100)
 rdd.toHBaseTable("mytable")
     .toColumns("column1", "column2", "timestamp")
     .inColumnFamily("mycf")
+    .usingTimestampRecord("timestamp")
     .save()
 ```
 
