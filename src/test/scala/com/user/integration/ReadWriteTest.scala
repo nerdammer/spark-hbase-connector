@@ -79,8 +79,8 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val count = sc.hbaseTable[(String, String)](tables(0))
       .select("column1")
       .inColumnFamily(columnFamily)
-      .withTimerangeStartRow("1510679475910")
-      .withTimerangeEndRow("1510679475920")
+      .withTimerangeStart("1510679475910")
+      .withTimerangeEnd("1510679475920")
       .count
 
     count should be (100)
@@ -99,7 +99,7 @@ class ReadWriteTest extends FlatSpec with Matchers with BeforeAndAfterAll  {
     val count = sc.hbaseTable[(String, String)](tables(0))
       .select("column1")
       .inColumnFamily(columnFamily)
-      .withTimestampRow("1510679475915")
+      .withTimestamp("1510679475915")
       .count
 
     count should be (100)

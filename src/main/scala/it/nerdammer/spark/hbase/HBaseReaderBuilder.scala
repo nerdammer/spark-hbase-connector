@@ -16,9 +16,9 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       private[hbase] val columns: Iterable[String] = Seq.empty,
       private[hbase] val startRow: Option[String] = None,
       private[hbase] val stopRow: Option[String] = None,
-      private[hbase] val timestampRow: Option[String] = None,
-      private[hbase] val timerangeStartRow: Option[String] = None,
-      private[hbase] val timerangeEndRow: Option[String] = None,
+      private[hbase] val timestamp: Option[String] = None,
+      private[hbase] val timerangeStart: Option[String] = None,
+      private[hbase] val timerangeEnd: Option[String] = None,
       private[hbase] val salting: Iterable[String] = Seq.empty
       )
       (implicit mapper: FieldReader[R], saltingProvider: SaltingProviderFactory[String]) extends Serializable {
@@ -53,25 +53,25 @@ case class HBaseReaderBuilder [R: ClassTag] private[hbase] (
       this.copy(stopRow = Some(stopRow))
     }
 
-    def withTimestampRow(timestampRow: String) = {
-      require(timestampRow.nonEmpty, s"Invalid timestamp row '$timestampRow'")
-      require(this.timestampRow.isEmpty, "Timestamp row has already been set")
+    def withTimestamp(timestamp: String) = {
+      require(timestamp.nonEmpty, s"Invalid timestamp row '$timestamp'")
+      require(this.timestamp.isEmpty, "Timestamp row has already been set")
 
-      this.copy(timestampRow = Some(timestampRow))
+      this.copy(timestamp = Some(timestamp))
     }
 
-    def withTimerangeStartRow(timerangeStartRow: String) = {
-      require(timerangeStartRow.nonEmpty, s"Invalid timestamp start row '$timerangeStartRow'")
-      require(this.timerangeStartRow.isEmpty, "Timestamp start row has already been set")
+    def withTimerangeStart(timerangeStart: String) = {
+      require(timerangeStart.nonEmpty, s"Invalid timestamp start row '$timerangeStart'")
+      require(this.timerangeStart.isEmpty, "Timestamp start row has already been set")
 
-      this.copy(timerangeStartRow = Some(timerangeStartRow))
+      this.copy(timerangeStart = Some(timerangeStart))
     }
 
-    def withTimerangeEndRow(timerangeEndRow: String) = {
-      require(timerangeEndRow.nonEmpty, s"Invalid timestamp start row '$timerangeEndRow'")
-      require(this.timerangeEndRow.isEmpty, "Timestamp start row has already been set")
+    def withTimerangeEnd(timerangeEnd: String) = {
+      require(timerangeEnd.nonEmpty, s"Invalid timestamp start row '$timerangeEnd'")
+      require(this.timerangeEnd.isEmpty, "Timestamp start row has already been set")
 
-      this.copy(timerangeEndRow = Some(timerangeEndRow))
+      this.copy(timerangeEnd = Some(timerangeEnd))
     }
 
     def withSalting(salting: Iterable[String]) = {
@@ -123,16 +123,16 @@ trait HBaseReaderBuilderConversions extends Serializable {
       hbaseConfig.set(TableInputFormat.SCAN_ROW_STOP, builder.stopRow.get)
     }
 
-    if(builder.timestampRow.nonEmpty) {
-      hbaseConfig.set(TableInputFormat.SCAN_TIMESTAMP, builder.timestampRow.get)
+    if(builder.timestamp.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMESTAMP, builder.timestamp.get)
     }
 
-    if(builder.timerangeStartRow.nonEmpty) {
-      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_START, builder.timerangeStartRow.get)
+    if(builder.timerangeStart.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_START, builder.timerangeStart.get)
     }
 
-    if(builder.timerangeEndRow.nonEmpty) {
-      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_END, builder.timerangeEndRow.get)
+    if(builder.timerangeEnd.nonEmpty) {
+      hbaseConfig.set(TableInputFormat.SCAN_TIMERANGE_END, builder.timerangeEnd.get)
     }
 
     val rdd = builder.sc.newAPIHadoopRDD(hbaseConfig, classOf[TableInputFormat],

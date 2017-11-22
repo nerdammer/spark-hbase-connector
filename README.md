@@ -196,8 +196,8 @@ It is also possible to filter by Time range and Timestamp
 val rdd = sc.hbaseTable[(String, String)]("table")
       .select("col")
       .inColumnFamily(columnFamily)
-      .withTimerangeStartRow("1510679475915")
-      .withTimerangeEndRow("1510679475920")
+      .withTimerangeStart("1510679475915")
+      .withTimerangeEnd("1510679475920")
 ```
 
 ### Timestamp
@@ -206,7 +206,7 @@ val rdd = sc.hbaseTable[(String, String)]("table")
 val rdd = sc.hbaseTable[(String, String)]("table")
       .select("col")
       .inColumnFamily(columnFamily)
-      .withTimestampRow("1510679475915")
+      .withTimestamp("1510679475915")
 ```
 
 ### Managing Empty Columns
