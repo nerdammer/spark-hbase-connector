@@ -106,7 +106,7 @@ val rdd = sc.parallelize(1 to 100)
             .map(i => (i.toString, i+1, "Hello"))
 ```
 
-This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**.
+This *rdd* is made of tuples like `("1", 2, "Hello")` or `("27", 28, "Hello")`. The first element of each tuple is considered the **row id**, the others will be assigned to columns.
 
 ```scala
 rdd.toHBaseTable("mytable")

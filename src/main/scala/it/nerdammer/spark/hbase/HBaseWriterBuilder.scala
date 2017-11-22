@@ -91,6 +91,10 @@ class HBaseWriter[R: ClassTag](builder: HBaseWriterBuilder[R])(implicit mapper: 
       val put = if (builder.timestampColumn != None) {
         val findTimestampColumn = (item:(String, Option[Array[Byte]])) => item._1 ==  builder.timestampColumn.get
 
+        if (record.find(findTimestampColumn).isEmpty) {
+          throw new IllegalArgumentException(s"Timestamp column doesn't exists - ${ builder.timestampColumn.get} found ${columns.size}")
+        }
+
         val timestamp = Bytes.toString(record.find(findTimestampColumn).get._2.get).toLong
 
         record = record.dropWhile(findTimestampColumn)
